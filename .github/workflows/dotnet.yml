@@ -9,6 +9,7 @@ on:
     - master
     - dev
   pull_request:
+    types: [synchronize, review_requested, edited]
     branches:
     - master
     - dev
