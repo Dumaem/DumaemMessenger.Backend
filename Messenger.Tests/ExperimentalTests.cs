@@ -11,12 +11,4 @@ public class ExperimentalTests
 
         result.Should().Be(10);
     }
-    
-    [Fact]
-    public void ExperimentalTest_ShouldFail()
-    {
-        var result = 10;
-
-        result.Should().Be(12);
-    }
 }
