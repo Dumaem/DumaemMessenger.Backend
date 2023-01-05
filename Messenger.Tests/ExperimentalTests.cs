@@ -11,4 +11,10 @@ public class ExperimentalTests
 
         10.Should().Be(10);
     }
+
+    [Fact]
+    public void Test_Failure()
+    {
+        10.Should().Be(12);
+    }
 }
