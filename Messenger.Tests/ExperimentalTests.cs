@@ -8,5 +8,7 @@ public class ExperimentalTests
     public void Test_Success()
     {
         10.Should().Be(10);
+
+        10.Should().Be(10);
     }
 }
