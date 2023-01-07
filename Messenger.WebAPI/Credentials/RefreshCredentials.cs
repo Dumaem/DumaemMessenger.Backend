@@ -1,4 +1,4 @@
-﻿using Messenger.WebAPI.Authentication;
+﻿using Messenger.Domain.Models;
 
 namespace Messenger.WebAPI.Credentials;
 
@@ -7,5 +7,5 @@ namespace Messenger.WebAPI.Credentials;
 /// </summary>
 public class RefreshCredentials
 {
-    public JwtToken Token { get; set; }
+    public JwtToken Token { get; set; } = null!;
 }

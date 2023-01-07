@@ -1,6 +1,7 @@
-﻿using Messenger.WebAPI.Domain.Models;
+﻿using Messenger.Domain.Models;
+using Messenger.Domain.Repositories;
 
-namespace Messenger.WebAPI.Database.Repositories.Impl;
+namespace Messenger.Database.Repositories;
 
 public class RefreshTokenRepository : IRefreshTokenRepository
 {

@@ -1,6 +1,6 @@
-﻿using Messenger.WebAPI.Authentication;
+﻿using Messenger.Domain.Models;
 
-namespace Messenger.WebAPI.Domain;
+namespace Messenger.Domain;
 
 public class AuthenticationResult
 {

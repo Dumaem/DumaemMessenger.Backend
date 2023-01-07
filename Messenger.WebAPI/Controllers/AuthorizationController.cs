@@ -1,7 +1,6 @@
-﻿using Messenger.WebAPI.Authentication;
+﻿using Messenger.Domain;
+using Messenger.Domain.Services;
 using Messenger.WebAPI.Credentials;
-using Messenger.WebAPI.Domain;
-using Messenger.WebAPI.Domain.Services;
 using Messenger.WebAPI.Responses;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,6 +42,11 @@ public class AuthorizationController : ControllerBase
     [Route("refresh")]
     public async Task<IActionResult> Refresh([FromBody] RefreshCredentials credentials)
     {
+        if (credentials.Token.AccessToken is null || credentials.Token.RefreshToken is null)
+        {
+            return BadRequest("Tokens cannot be null");
+        }
+        
         var result = await _authorizationService.RefreshAsync(credentials.Token.AccessToken, credentials.Token.RefreshToken);
 
         return VerifyAuthenticationResult(result);

@@ -1,7 +1,7 @@
-﻿using Messenger.WebAPI.Database.Repositories;
-using Messenger.WebAPI.Domain.Models;
+﻿using Messenger.Domain.Models;
+using Messenger.Domain.Repositories;
 
-namespace Messenger.WebAPI.Domain.Services.Impl;
+namespace Messenger.Domain.Services.Impl;
 
 public class UserService : IUserService
 {

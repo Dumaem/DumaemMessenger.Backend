@@ -1,9 +1,5 @@
 ﻿using System.Text;
-using Messenger.WebAPI.Database.Repositories;
-using Messenger.WebAPI.Database.Repositories.Impl;
-using Messenger.WebAPI.Domain.Services;
-using Messenger.WebAPI.Domain.Services.Impl;
-using Messenger.WebAPI.Settings;
+using Messenger.Domain.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -11,17 +7,6 @@ namespace Messenger.WebAPI;
 
 public static class ServiceCollectionExtensions
 {
-    public static void RegisterDomainServices(this IServiceCollection services)
-    {
-        services.AddScoped<IAuthorizationService, AuthorizationService>();
-        services.AddScoped<IUserService, UserService>();
-    }
-
-    public static void RegisterDatabaseRepositories(this IServiceCollection services)
-    {
-        services.AddScoped<IUserRepository, UserRepository>();
-    }
-    
     public static void ConfigureAuthorization(this IServiceCollection services, IConfiguration configuration)
     {
         var jwtSettings = new JwtSettings();

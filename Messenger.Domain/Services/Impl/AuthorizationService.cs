@@ -1,13 +1,12 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Messenger.WebAPI.Authentication;
-using Messenger.WebAPI.Database.Repositories;
-using Messenger.WebAPI.Domain.Models;
-using Messenger.WebAPI.Settings;
+using Messenger.Domain.Models;
+using Messenger.Domain.Repositories;
+using Messenger.Domain.Settings;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Messenger.WebAPI.Domain.Services.Impl;
+namespace Messenger.Domain.Services.Impl;
 
 public class AuthorizationService : IAuthorizationService
 {
@@ -84,7 +83,7 @@ public class AuthorizationService : IAuthorizationService
         int.TryParse(validatedToken.Claims.Single(x => x.Type == "id").Value, out var userId);
         var user = await _userService.GetUserByIdAsync(userId);
 
-        return await GenerateTokenForUserAsync(user);
+        return await GenerateTokenForUserAsync(user!);
     }
 
     private ClaimsPrincipal? GetPrincipalFromToken(string token)
@@ -132,7 +131,6 @@ public class AuthorizationService : IAuthorizationService
         var accessToken = tokenHandler.CreateToken(tokenDescriptor);
         var refreshToken = new RefreshToken
         {
-            Token = Guid.NewGuid().ToString(),
             JwtId = accessToken.Id,
             UserId = user.Id,
             CreationDate = DateTime.UtcNow,

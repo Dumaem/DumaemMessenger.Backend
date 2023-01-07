@@ -1,6 +1,6 @@
-﻿using Messenger.WebAPI.Domain.Models;
+﻿using Messenger.Domain.Models;
 
-namespace Messenger.WebAPI.Database.Repositories;
+namespace Messenger.Domain.Repositories;
 
 public interface IUserRepository
 {

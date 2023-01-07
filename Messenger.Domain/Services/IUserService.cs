@@ -1,6 +1,6 @@
-﻿using Messenger.WebAPI.Domain.Models;
+﻿using Messenger.Domain.Models;
 
-namespace Messenger.WebAPI.Domain.Services;
+namespace Messenger.Domain.Services;
 
 public interface IUserService
 {
