@@ -41,6 +41,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.ConfigureAuthorization(builder.Configuration);
+builder.Services.RegisterDatabaseSources(builder.Configuration);
 builder.Services.RegisterDomainServices();
 builder.Services.RegisterDatabaseRepositories();
 
