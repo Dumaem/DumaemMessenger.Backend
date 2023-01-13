@@ -17,6 +17,7 @@ public static class ServiceCollectionExtensions
                 .ScanIn(typeof(InitialMigration).Assembly)
                 .For.Migrations())
             .AddLogging(log => log.AddFluentMigratorConsole());
+        services.AddHostedService<MigrationHostedService>();
         return services;
     }
 }

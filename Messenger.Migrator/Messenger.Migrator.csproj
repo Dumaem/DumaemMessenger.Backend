@@ -15,4 +15,7 @@
       <PackageReference Include="Npgsql" Version="7.0.1" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Messenger.Domain\Messenger.Domain.csproj" />
+    </ItemGroup>
 </Project>

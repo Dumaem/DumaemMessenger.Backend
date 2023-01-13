@@ -9,43 +9,43 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Description = "Get token from [POST] /login endpoint and paste it here with this template: Bearer {Your token}",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
-    });
 
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+builder.Services
+    .AddEndpointsApiExplorer()
+    .ConfigureAuthorization(builder.Configuration)
+    .RegisterDatabaseSources(builder.Configuration)
+    .RegisterDomainServices()
+    .RegisterDatabaseRepositories()
+    .AddMigrations(builder.Configuration)
+    .AddSwaggerGen(c =>
     {
+        c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
         {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                },
-                Scheme = "oauth2",
-                Name = "Bearer",
-                In = ParameterLocation.Header,
-            },
-            new List<string>()
-        }
-    });
-});
+            Description = "Get token from [POST] /login endpoint and paste it here with this template: Bearer {Your token}",
+            Name = "Authorization",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.ApiKey,
+            Scheme = "Bearer"
+        });
 
-builder.Services.ConfigureAuthorization(builder.Configuration);
-builder.Services.RegisterDatabaseSources(builder.Configuration);
-builder.Services.RegisterDomainServices();
-builder.Services.RegisterDatabaseRepositories();
-builder.Services.AddMigrations(builder.Configuration);
+        c.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    },
+                    Scheme = "oauth2",
+                    Name = "Bearer",
+                    In = ParameterLocation.Header,
+                },
+                new List<string>()
+            }
+        });
+    });
 
 var app = builder.Build();
 

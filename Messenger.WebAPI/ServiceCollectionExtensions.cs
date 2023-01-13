@@ -7,7 +7,7 @@ namespace Messenger.WebAPI;
 
 public static class ServiceCollectionExtensions
 {
-    public static void ConfigureAuthorization(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection ConfigureAuthorization(this IServiceCollection services, IConfiguration configuration)
     {
         var jwtSettings = new JwtSettings();
         configuration.Bind(nameof(jwtSettings), jwtSettings);
@@ -36,5 +36,7 @@ public static class ServiceCollectionExtensions
                 jwt.SaveToken = true;
                 jwt.TokenValidationParameters = tokenValidationParameters;
             });
+
+        return services;
     }
 }
