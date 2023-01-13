@@ -2,7 +2,7 @@
 
 namespace Messenger.Migrator.Migrations;
 
-[Migration(2023_01_13_1)]
+[Migration(2023_01_13_01)]
 public class InitialMigration : Migration
 {
     public override void Up()
