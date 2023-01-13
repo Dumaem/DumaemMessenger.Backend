@@ -16,9 +16,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Reference Include="Microsoft.Extensions.Hosting.Abstractions">
-        <HintPath>..\..\..\..\..\Program Files\dotnet\shared\Microsoft.AspNetCore.App\7.0.1\Microsoft.Extensions.Hosting.Abstractions.dll</HintPath>
-      </Reference>
+      <ProjectReference Include="..\Messenger.Domain\Messenger.Domain.csproj" />
     </ItemGroup>
-
 </Project>
