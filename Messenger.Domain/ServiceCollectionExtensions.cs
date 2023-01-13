@@ -6,9 +6,11 @@ namespace Messenger.Domain;
 
 public static class ServiceCollectionExtensions
 {
-    public static void RegisterDomainServices(this IServiceCollection services)
+    public static IServiceCollection RegisterDomainServices(this IServiceCollection services)
     {
         services.AddScoped<IAuthorizationService, AuthorizationService>();
         services.AddScoped<IUserService, UserService>();
+
+        return services;
     }
 }

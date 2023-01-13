@@ -7,14 +7,18 @@ namespace Messenger.Database;
 
 public static class ServiceCollectionExtensions
 {
-    public static void RegisterDatabaseRepositories(this IServiceCollection services)
+    public static IServiceCollection RegisterDatabaseRepositories(this IServiceCollection services)
     {
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+
+        return services;
     }
     
-    public static void RegisterDatabaseSources(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection RegisterDatabaseSources(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<NgpsqlContext>(_ => new NgpsqlContext(configuration.GetConnectionString("DefaultConnection")!));
+
+        return services;
     }
 }

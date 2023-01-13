@@ -1,5 +1,6 @@
 using Messenger.Database;
 using Messenger.Domain;
+using Messenger.Migrator;
 using Messenger.WebAPI;
 using Microsoft.OpenApi.Models;
 
@@ -44,6 +45,7 @@ builder.Services.ConfigureAuthorization(builder.Configuration);
 builder.Services.RegisterDatabaseSources(builder.Configuration);
 builder.Services.RegisterDomainServices();
 builder.Services.RegisterDatabaseRepositories();
+builder.Services.AddMigrations(builder.Configuration);
 
 var app = builder.Build();
 

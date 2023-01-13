@@ -18,6 +18,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Messenger.Domain\Messenger.Domain.csproj" />
       <ProjectReference Include="..\Messenger.Database\Messenger.Database.csproj" />
+      <ProjectReference Include="..\Messenger.Migrator\Messenger.Migrator.csproj" />
     </ItemGroup>
 
 </Project>
