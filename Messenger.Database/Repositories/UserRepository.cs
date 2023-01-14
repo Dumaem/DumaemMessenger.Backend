@@ -1,5 +1,4 @@
-﻿using System.Security.Cryptography;
-using Messenger.Database.Write;
+﻿using Messenger.Database.Write;
 using Messenger.Domain.Models;
 using Messenger.Domain.Repositories;
 

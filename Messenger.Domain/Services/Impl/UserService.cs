@@ -23,7 +23,7 @@ public class UserService : IUserService
     public async Task<User?> GetUserByEmailAsync(string email)
     {
         // TODO: избавиться от затычки
-        return null;
+        return new User { Email = "123123" };
     }
 
     public Task<User?> GetUserByIdAsync(int id)
