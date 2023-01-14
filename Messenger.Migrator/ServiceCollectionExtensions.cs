@@ -15,8 +15,8 @@ public static class ServiceCollectionExtensions
                 .AddPostgres()
                 .WithGlobalConnectionString(configuration.GetConnectionString("DefaultConnection")!)
                 .ScanIn(typeof(InitialMigration).Assembly)
-                .For.Migrations())
-            .AddLogging(log => log.AddFluentMigratorConsole());
+                .For.Migrations());
+
         services.AddHostedService<MigrationHostedService>();
         return services;
     }
