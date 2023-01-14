@@ -1,6 +1,6 @@
 ﻿namespace Messenger.Database.Models;
 
-public partial class TypeContentDb
+public partial class ContentTypeDb
 {
     public int Id { get; set; }
 

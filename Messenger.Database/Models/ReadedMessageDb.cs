@@ -1,6 +1,6 @@
 ﻿namespace Messenger.Database.Models;
 
-public partial class ReadedMessageDb
+public partial class ReadMessageDb
 {
     public int Id { get; set; }
 

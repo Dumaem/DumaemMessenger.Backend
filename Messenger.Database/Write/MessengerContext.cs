@@ -22,9 +22,9 @@ public class MessengerContext : DbContext
 
     public virtual DbSet<MessageContentDb> MessageContents { get; set; } = null!;
 
-    public virtual DbSet<ReadedMessageDb> ReadedMessages { get; set; } = null!;
+    public virtual DbSet<ReadMessageDb> ReadMessages { get; set; } = null!;
 
-    public virtual DbSet<TypeContentDb> TypeContents { get; set; } = null!;
+    public virtual DbSet<ContentTypeDb> ContentTypes { get; set; } = null!;
 
     public virtual DbSet<UserDb> Users { get; set; } = null!;
 
@@ -74,18 +74,18 @@ public class MessengerContext : DbContext
             entity.Property(e => e.TypeId).HasColumnName("type_id");
         });
 
-        modelBuilder.Entity<ReadedMessageDb>(entity =>
+        modelBuilder.Entity<ReadMessageDb>(entity =>
         {
-            entity.ToTable("readed_message");
+            entity.ToTable("read_message");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.MessageId).HasColumnName("message_id");
             entity.Property(e => e.UserId).HasColumnName("user_id");
         });
 
-        modelBuilder.Entity<TypeContentDb>(entity =>
+        modelBuilder.Entity<ContentTypeDb>(entity =>
         {
-            entity.ToTable("type_content");
+            entity.ToTable("content_type");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Name).HasColumnName("name");
