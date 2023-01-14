@@ -2,6 +2,7 @@ using Messenger.Database;
 using Messenger.Domain;
 using Messenger.Migrator;
 using Messenger.WebAPI;
+using Messenger.WebAPI.Middlewares;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,6 +49,7 @@ builder.Services
     });
 
 var app = builder.Build();
+app.UseMiddleware<ExceptionMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -1,4 +1,5 @@
 ﻿using FluentMigrator.Runner;
+using Messenger.Domain.Exception;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -29,7 +30,7 @@ public class MigrationHostedService : IHostedService
         catch (Exception e)
         {
             _logger.LogError("Migration failed {Message}", e.Message);
-            throw;
+            throw new MigrationException("Migration failed. See inner exception for details", e);
         }
 
         return Task.CompletedTask;
