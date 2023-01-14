@@ -108,6 +108,19 @@ public class MessengerContext : DbContext
             entity.Property(e => e.ChatId).HasColumnName("chat_id");
             entity.Property(e => e.UserId).HasColumnName("user_id");
         });
+        
+        modelBuilder.Entity<RefreshTokenDb>(entity =>
+        {
+            entity.ToTable("refresh_token");
 
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Token).HasColumnName("token");
+            entity.Property(e => e.JwtId).HasColumnName("jwt_id");
+            entity.Property(e => e.IsUsed).HasColumnName("is_used");
+            entity.Property(e => e.IsRevoked).HasColumnName("is_revoked");
+            entity.Property(e => e.CreationDate).HasColumnName("creation_date");
+            entity.Property(e => e.ExpiryDate).HasColumnName("expiry_date");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+        });
     }
 }
