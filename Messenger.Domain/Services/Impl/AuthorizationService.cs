@@ -37,9 +37,9 @@ public class AuthorizationService : IAuthorizationService
             Username = email
         };
 
-        var isUserCreated = await _userService.CreateUser(user, password);
+        var isUserCreated = await _userService.CreateUserAsync(user, password);
 
-        if (!isUserCreated)
+        if (isUserCreated is not null)
             return new AuthenticationResult {Success = false, Message = "Could not create user"};
 
         return await GenerateTokenForUserAsync(user);
@@ -52,7 +52,7 @@ public class AuthorizationService : IAuthorizationService
         if (existingUser is null)
             return new AuthenticationResult {Success = false, Message = "User does not exist"};
 
-        var isPasswordValid = await _userService.CheckUserPassword(existingUser, password);
+        var isPasswordValid = await _userService.CheckUserPasswordAsync(existingUser, password);
 
         if (!isPasswordValid)
             return new AuthenticationResult {Success = false, Message = "User has wrong password"};

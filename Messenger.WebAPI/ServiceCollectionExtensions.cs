@@ -10,8 +10,11 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection ConfigureAuthorization(this IServiceCollection services, IConfiguration configuration)
     {
         var jwtSettings = new JwtSettings();
+        var encryptionSettings = new EncryptionSettings();
         configuration.Bind(nameof(jwtSettings), jwtSettings);
+        configuration.Bind(nameof(encryptionSettings), encryptionSettings);
         services.AddSingleton(jwtSettings);
+        services.AddSingleton(encryptionSettings);
 
         var tokenValidationParameters = new TokenValidationParameters
         {

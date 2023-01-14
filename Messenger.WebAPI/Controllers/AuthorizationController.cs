@@ -1,8 +1,8 @@
 ﻿using Messenger.Domain;
-using Messenger.Domain.Services;
 using Messenger.WebAPI.Credentials;
 using Messenger.WebAPI.Responses;
 using Microsoft.AspNetCore.Mvc;
+using IAuthorizationService = Messenger.Domain.Services.IAuthorizationService;
 
 namespace Messenger.WebAPI.Controllers;
 
