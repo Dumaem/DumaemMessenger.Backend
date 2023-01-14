@@ -6,23 +6,24 @@ namespace Messenger.Domain.Services.Impl;
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IEncryptionService _encryptionService;
 
-    public UserService(IUserRepository userRepository)
+    public UserService(IUserRepository userRepository, IEncryptionService encryptionService)
     {
         _userRepository = userRepository;
+        _encryptionService = encryptionService;
     }
 
-    public Task<bool> CreateUser(User user, string password)
+    public async Task<int?> CreateUserAsync(User user, string password)
     {
-        // TODO: избавиться от затычки
-        user.Id = 1;
-        return Task.FromResult(true);
+        var encryptedPassword = await _encryptionService.EncryptString(password);
+        return await _userRepository.CreateUserAsync(user, encryptedPassword);
     }
 
-    public Task<User?> GetUserByEmailAsync(string email)
+    public async Task<User?> GetUserByEmailAsync(string email)
     {
         // TODO: избавиться от затычки
-        return Task.FromResult(new User {Id = 1, Email = "123123", Username = "123123"});
+        return null;
     }
 
     public Task<User?> GetUserByIdAsync(int id)
@@ -30,7 +31,7 @@ public class UserService : IUserService
         throw new NotImplementedException();
     }
 
-    public Task<bool> CheckUserPassword(User user, string password)
+    public Task<bool> CheckUserPasswordAsync(User user, string password)
     {
         // TODO: избавиться от затычки
         return Task.FromResult(true);
