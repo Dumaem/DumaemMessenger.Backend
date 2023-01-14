@@ -3,12 +3,18 @@ using System.Collections.Generic;
 
 namespace Messenger.Database.Models;
 
-public partial class RefreshTokenDb
+public class RefreshTokenDb
 {
     public int Id { get; set; }
 
-    public string Token { get; set; } = null!;
+    /// <summary>
+    /// Server-generated token Id used on client
+    /// </summary>
+    public string Token { get; } = Guid.NewGuid().ToString();
 
+    /// <summary>
+    /// Access token Id that is related to this refresh token
+    /// </summary>
     public string JwtId { get; set; } = null!;
 
     public bool IsUsed { get; set; }

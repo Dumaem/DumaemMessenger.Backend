@@ -39,7 +39,7 @@ namespace Messenger.Migrator.Migrations
             
             Create.ForeignKey()
                 .FromTable("message_content").ForeignColumn("type_id")
-                .ToTable("type").PrimaryColumn("id");
+                .ToTable("content_type").PrimaryColumn("id");
             
             Create.ForeignKey()
                 .FromTable("user_chat").ForeignColumn("user_id")
@@ -54,11 +54,11 @@ namespace Messenger.Migrator.Migrations
                 .ToTable("message").PrimaryColumn("id");
             
             Create.ForeignKey()
-                .FromTable("readed_message").ForeignColumn("user_id")
+                .FromTable("read_message").ForeignColumn("user_id")
                 .ToTable("user").PrimaryColumn("id");
             
             Create.ForeignKey()
-                .FromTable("readed_message").ForeignColumn("message_id")
+                .FromTable("read_message").ForeignColumn("message_id")
                 .ToTable("message").PrimaryColumn("id");
         }
     }
