@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Messenger.Database.Models;
 
-public partial class MessageContent
+public partial class MessageContentDb
 {
     public long Id { get; set; }
 

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace Messenger.Database.Models;
 
-public partial class User
+public partial class UserChatDb
 {
     public int Id { get; set; }
 
-    public string Username { get; set; } = null!;
+    public int UserId { get; set; }
 
-    public string Name { get; set; } = null!;
+    public int ChatId { get; set; }
 }

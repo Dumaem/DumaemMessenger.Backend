@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Messenger.Database.Models;
 
-public partial class DeletedMessage
+public partial class ReadedMessageDb
 {
     public int Id { get; set; }
 

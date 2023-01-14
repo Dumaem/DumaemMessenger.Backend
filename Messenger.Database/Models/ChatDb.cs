@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Messenger.Database.Models;
 
-public partial class TypeContent
+public partial class ChatDb
 {
     public int Id { get; set; }
 
