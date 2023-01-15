@@ -1,12 +1,12 @@
 ﻿using Npgsql;
 
-namespace Messenger.Database;
+namespace Messenger.Database.Read;
 
-public class NgpsqlContext : IDisposable, IAsyncDisposable
+public class MessengerReadonlyContext : IDisposable, IAsyncDisposable
 {
     public NpgsqlConnection Connection { get; }
 
-    public NgpsqlContext(string connectionString)
+    public MessengerReadonlyContext(string connectionString)
     {
         Connection = new NpgsqlConnection(connectionString);
     }

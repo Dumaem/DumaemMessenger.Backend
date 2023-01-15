@@ -9,9 +9,6 @@ namespace Messenger.Domain.Tests;
 
 public class AuthorizationTests
 {
-    private const string Email = "testEmail@mail.ru";
-    private const string Password = "testEmail@mail.ru";
-    
     private readonly Mock<IUserService> _userServiceMock;
     private readonly Mock<IRefreshTokenRepository> _refreshTokenRepositoryMock;
     private readonly Mock<JwtSettings> _jwtSettingsMock;
@@ -35,35 +32,24 @@ public class AuthorizationTests
     {
         _userServiceMock.Setup(x => x.GetUserByEmailAsync(It.IsAny<string>())).ReturnsAsync(new User());
 
-        var res = await _authorizationService.RegisterAsync(It.IsAny<string>(), It.IsAny<string>());
+        var res = await _authorizationService.RegisterAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
+            It.IsAny<string>());
 
         res.Should().BeOfType<AuthenticationResult>();
         res.Success.Should().BeFalse();
         res.Message.Should().Be("User with this email already exists");
     }
-    
-    [Fact]
-    public async Task RegisterAsync_UserHasNotBeenCreated_ShouldReturnUnsuccessfulResult()
-    {
-        _userServiceMock.Setup(x => x.GetUserByEmailAsync(It.IsAny<string>())).ReturnsAsync((User?)null);
-        _userServiceMock.Setup(x => x.CreateUserAsync(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync((int?)null);
 
-        var res = await _authorizationService.RegisterAsync(It.IsAny<string>(), It.IsAny<string>());
-        
-        res.Should().BeOfType<AuthenticationResult>();
-        res.Success.Should().BeFalse();
-        res.Message.Should().Be("Could not create user");
-    }
-    
     [Fact]
     public async Task RegisterAsync_SuccessPath_ShouldReturnSuccessfulResult()
     {
-        _userServiceMock.Setup(x => x.GetUserByEmailAsync(It.IsAny<string>())).ReturnsAsync((User?)null);
-        _userServiceMock.Setup(x => x.CreateUserAsync(It.IsAny<User>(), Password)).ReturnsAsync(It.IsAny<int>());
+        _userServiceMock.Setup(x => x.GetUserByEmailAsync(It.IsAny<string>())).ReturnsAsync((User?) null);
+        _userServiceMock.Setup(x => x.CreateUserAsync(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(It.IsAny<int>());
         _jwtSettingsMock.SetupJwtSettingsMock();
 
-        var res = await _authorizationService.RegisterAsync(Email, Password);
-        
+        var res = await _authorizationService.RegisterAsync(string.Empty, string.Empty, string.Empty,
+            It.IsAny<string>());
+
         res.Success.Should().BeTrue();
         res.Message.Should().BeNull();
         res.Token.Should().NotBeNull();

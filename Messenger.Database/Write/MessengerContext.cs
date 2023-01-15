@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using Messenger.Database.Models;
+﻿using Messenger.Database.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Messenger.Database.Write;
 
-public partial class MessengerContext : DbContext
+public class MessengerContext : DbContext
 {
     public MessengerContext()
     {
@@ -16,28 +14,23 @@ public partial class MessengerContext : DbContext
     {
     }
 
-    public virtual DbSet<ChatDb> Chats { get; set; }
+    public virtual DbSet<ChatDb> Chats { get; set; } = null!;
 
-    public virtual DbSet<ContentTypeDb> ContentTypes { get; set; }
+    public virtual DbSet<ContentTypeDb> ContentTypes { get; set; } = null!;
 
-    public virtual DbSet<DeletedMessageDb> DeletedMessages { get; set; }
+    public virtual DbSet<DeletedMessageDb> DeletedMessages { get; set; } = null!;
 
-    public virtual DbSet<MessageDb> Messages { get; set; }
+    public virtual DbSet<MessageDb> Messages { get; set; } = null!;
 
-    public virtual DbSet<MessageContentDb> MessageContents { get; set; }
+    public virtual DbSet<MessageContentDb> MessageContents { get; set; } = null!;
 
-    public virtual DbSet<ReadMessageDb> ReadMessages { get; set; }
+    public virtual DbSet<ReadMessageDb> ReadMessages { get; set; } = null!;
 
-    public virtual DbSet<RefreshTokenDb> RefreshTokens { get; set; }
+    public virtual DbSet<RefreshTokenDb> RefreshTokens { get; set; } = null!;
 
-    public virtual DbSet<UserDb> Users { get; set; }
+    public virtual DbSet<UserDb> Users { get; set; } = null!;
 
-    public virtual DbSet<UserChatDb> UserChats { get; set; }
-
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseNpgsql("Host=26.204.218.207;Port=5432;Database=messenger;Username=developer;Password=postgreS12;");
+    public virtual DbSet<UserChatDb> UserChats { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -163,10 +156,10 @@ public partial class MessengerContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CreationDate)
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamp with time zone")
                 .HasColumnName("creation_date");
             entity.Property(e => e.ExpiryDate)
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamp with time zone")
                 .HasColumnName("expiry_date");
             entity.Property(e => e.IsRevoked).HasColumnName("is_revoked");
             entity.Property(e => e.IsUsed).HasColumnName("is_used");

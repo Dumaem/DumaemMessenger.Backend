@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace Messenger.Database.Models;
 
-namespace Messenger.Database.Models;
-
-public partial class DeletedMessageDb
+public class DeletedMessageDb
 {
     public int Id { get; set; }
 

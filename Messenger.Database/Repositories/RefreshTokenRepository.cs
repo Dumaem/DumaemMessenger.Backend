@@ -1,13 +1,29 @@
-﻿using Messenger.Domain.Models;
+﻿using Messenger.Database.Models;
+using Messenger.Database.Write;
+using Messenger.Domain.Models;
 using Messenger.Domain.Repositories;
 
 namespace Messenger.Database.Repositories;
 
 public class RefreshTokenRepository : IRefreshTokenRepository
 {
-    public Task CreateTokenAsync(RefreshToken refreshToken)
+    private readonly MessengerContext _context;
+
+    public RefreshTokenRepository(MessengerContext context)
     {
-        return Task.CompletedTask;
+        _context = context;
+    }
+
+    public async Task CreateTokenAsync(RefreshToken refreshToken)
+    {
+        var refreshTokenDb = new RefreshTokenDb
+        {
+            JwtId = refreshToken.JwtId, CreationDate = refreshToken.CreationDate, UserId = refreshToken.UserId,
+            ExpiryDate = refreshToken.ExpiryDate
+        };
+
+        _context.RefreshTokens.Add(refreshTokenDb);
+        await _context.SaveChangesAsync();
     }
 
     public Task<RefreshToken?> GetTokenAsync(string token)
