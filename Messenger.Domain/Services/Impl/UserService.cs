@@ -30,9 +30,9 @@ public class UserService : IUserService
         return await _userRepository.GetUserByEmailAsync(email);
     }
 
-    public Task<User?> GetUserByIdAsync(int id)
+    public async Task<User?> GetUserByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        return await _userRepository.GetUserByIdAsync(id);
     }
 
     public async Task<bool> CheckUserPasswordAsync(int userId, string password)
