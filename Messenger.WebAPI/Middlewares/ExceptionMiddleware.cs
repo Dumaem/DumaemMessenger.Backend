@@ -1,4 +1,4 @@
-﻿using Messenger.Domain.ErrorMessages;
+﻿using FluentValidation;
 using Messenger.Domain.Exception;
 
 namespace Messenger.WebAPI.Middlewares;
@@ -26,6 +26,14 @@ public class ExceptionMiddleware
             _logger.LogCritical("Migrations are failed. Contact developer for help");
             throw;
         }
+        catch (ValidationException e)
+        {
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            await context.Response.WriteAsJsonAsync(new
+            {
+                e.Message
+            });
+        }
         catch (Exception e)
         {
             # if DEBUG
@@ -35,7 +43,7 @@ public class ExceptionMiddleware
             #endif
 
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-            _logger.Log(LogLevel.Information, "{ErrorMessage}", e.ToString());
+            _logger.Log(LogLevel.Error, "{ErrorMessage}", e.ToString());
             await context.Response.WriteAsJsonAsync(new
             {
                 Message = errorMessage
