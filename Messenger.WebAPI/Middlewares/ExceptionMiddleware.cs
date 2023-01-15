@@ -1,4 +1,5 @@
-﻿using Messenger.Domain.Exception;
+﻿using Messenger.Domain.ErrorMessages;
+using Messenger.Domain.Exception;
 
 namespace Messenger.WebAPI.Middlewares;
 
@@ -27,11 +28,17 @@ public class ExceptionMiddleware
         }
         catch (Exception e)
         {
+            # if DEBUG
+            var errorMessage = e.Message;
+            # else
+            var errorMessage = ServerErrorMessages.InternalServerError;
+            #endif
+
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
             _logger.Log(LogLevel.Information, "{ErrorMessage}", e.ToString());
             await context.Response.WriteAsJsonAsync(new
             {
-                Message = "Internal error. Contact developer to solve the problem."
+                Message = errorMessage
             });
         }
     }
