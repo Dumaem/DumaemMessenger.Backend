@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using Messenger.Domain.Extensions;
 using Messenger.Domain.Settings;
 
 namespace Messenger.Domain.Services.Impl;
@@ -15,6 +16,8 @@ public class EncryptionService : IEncryptionService
 
     public async Task<string> EncryptString(string content)
     {
-        return Encoding.ASCII.GetString(_encryptor.ComputeHash(Encoding.ASCII.GetBytes(content)));
+        var stream = await content.GenerateStreamAsync();
+
+        return Encoding.ASCII.GetString(await _encryptor.ComputeHashAsync(stream));
     }
 }
