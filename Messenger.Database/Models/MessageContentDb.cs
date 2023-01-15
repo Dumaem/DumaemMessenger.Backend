@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace Messenger.Database.Models;
 
-namespace Messenger.Database.Models;
-
-public partial class MessageContentDb
+public class MessageContentDb
 {
     public long Id { get; set; }
 
