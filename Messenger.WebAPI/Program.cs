@@ -16,6 +16,7 @@ builder.Services
     .ConfigureAuthorization(builder.Configuration)
     .RegisterDatabaseSources(builder.Configuration)
     .RegisterDomainServices()
+    .AddDomainValidation()
     .RegisterDatabaseRepositories()
     .AddMigrations(builder.Configuration)
     .AddSwaggerGen(c =>
