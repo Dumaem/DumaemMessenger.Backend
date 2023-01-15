@@ -21,7 +21,7 @@ public class UserService : IUserService
     {
         await _userDataValidator.ValidateAndThrowAsync(user);
         
-        var encryptedPassword = await _encryptionService.EncryptString(password);
+        var encryptedPassword = await _encryptionService.EncryptStringAsync(password);
         return await _userRepository.CreateUserAsync(user, encryptedPassword);
     }
 
