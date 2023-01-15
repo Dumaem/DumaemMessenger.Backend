@@ -9,14 +9,14 @@ public class UserValidator : AbstractValidator<User>
     private const string UsernameRegex = "^[a-zA-Z0-9_]+$";
     private const string NameRegex = "^[a-zA-Z]+$";
     
-    private const int MinimumPasswordLength = 6;
-    private const int MaximumPasswordLength = 32;
+    public const int MinimumPasswordLength = 6;
+    public const int MaximumPasswordLength = 32;
 
-    private const int MinimumUsernameLength = 5;
-    private const int MaximumUsernameLength = 50; 
+    public const int MinimumUsernameLength = 5;
+    public const int MaximumUsernameLength = 50; 
     
-    private const int MinimumNameLength = 1;
-    private const int MaximumNameLength = 100;
+    public const int MinimumNameLength = 1;
+    public const int MaximumNameLength = 100;
     
     public UserValidator()
     {
