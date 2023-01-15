@@ -156,10 +156,10 @@ public class MessengerContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CreationDate)
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamp with time zone")
                 .HasColumnName("creation_date");
             entity.Property(e => e.ExpiryDate)
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamp with time zone")
                 .HasColumnName("expiry_date");
             entity.Property(e => e.IsRevoked).HasColumnName("is_revoked");
             entity.Property(e => e.IsUsed).HasColumnName("is_used");

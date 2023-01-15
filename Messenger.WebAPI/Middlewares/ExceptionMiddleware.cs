@@ -1,5 +1,8 @@
 ﻿using FluentValidation;
 using Messenger.Domain.Exception;
+# if !DEBUG
+using Messenger.Domain.ErrorMessages;
+#endif
 
 namespace Messenger.WebAPI.Middlewares;
 
@@ -37,7 +40,7 @@ public class ExceptionMiddleware
         catch (Exception e)
         {
             # if DEBUG
-            var errorMessage = e.Message;
+            var errorMessage = e;
             # else
             var errorMessage = ServerErrorMessages.InternalServerError;
             #endif
