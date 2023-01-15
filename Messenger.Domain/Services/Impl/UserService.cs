@@ -37,7 +37,7 @@ public class UserService : IUserService
 
     public async Task<bool> CheckUserPasswordAsync(int userId, string password)
     {
-        var encryptedPassword = await _encryptionService.EncryptString(password);
+        var encryptedPassword = await _encryptionService.EncryptStringAsync(password);
         var storedUserPassword = await _userRepository.GetUserEncryptedPassword(userId);
 
         return encryptedPassword.Equals(storedUserPassword);
