@@ -36,7 +36,7 @@ public class UserRepository : IUserRepository
     {
         var dbUser = new UserDb
         {
-            Name = user.Username, Username = user.Username, Password = password, Email = user.Email
+            Name = user.Name, Username = user.Username, Password = password, Email = user.Email
         };
 
         _context.Users.Add(dbUser);

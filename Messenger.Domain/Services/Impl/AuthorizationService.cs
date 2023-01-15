@@ -24,17 +24,16 @@ public class AuthorizationService : IAuthorizationService
         _refreshTokenRepository = refreshTokenRepository;
     }
 
-    public async Task<AuthenticationResult> RegisterAsync(string email, string password)
+    public async Task<AuthenticationResult> RegisterAsync(string name, string email, string password, string? username)
     {
         var existingUser = await _userService.GetUserByEmailAsync(email);
 
         if (existingUser is not null)
             return new AuthenticationResult {Success = false, Message = "User with this email already exists"};
 
-        var user = new User()
+        var user = new User
         {
-            Email = email,
-            Username = email
+            Email = email, Username = username, Password = password, Name = name
         };
 
         var createdUserId = await _userService.CreateUserAsync(user, password);

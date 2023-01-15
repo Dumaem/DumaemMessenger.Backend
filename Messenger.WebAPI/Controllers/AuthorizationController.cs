@@ -24,11 +24,12 @@ public class AuthorizationController : ControllerBase
     [Route("register")]
     public async Task<IActionResult> Register([FromBody] RegistrationCredentials credentials)
     {
-        var result = await _authorizationService.RegisterAsync(credentials.Email, credentials.Password);
+        var result = await _authorizationService.RegisterAsync(credentials.Name, credentials.Email,
+            credentials.Password, credentials.Username);
 
         return VerifyAuthenticationResult(result);
     }
-    
+
     [HttpPost]
     [Route("login")]
     public async Task<IActionResult> Login([FromBody] AuthenticationCredentials credentials)
@@ -46,8 +47,9 @@ public class AuthorizationController : ControllerBase
         {
             return BadRequest("Tokens cannot be null");
         }
-        
-        var result = await _authorizationService.RefreshAsync(credentials.Token.AccessToken, credentials.Token.RefreshToken);
+
+        var result =
+            await _authorizationService.RefreshAsync(credentials.Token.AccessToken, credentials.Token.RefreshToken);
 
         return VerifyAuthenticationResult(result);
     }
