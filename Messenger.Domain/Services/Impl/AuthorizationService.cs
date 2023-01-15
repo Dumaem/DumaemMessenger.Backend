@@ -37,10 +37,8 @@ public class AuthorizationService : IAuthorizationService
             Username = email
         };
 
-        var isUserCreated = await _userService.CreateUserAsync(user, password);
-
-        if (isUserCreated is not null)
-            return new AuthenticationResult {Success = false, Message = "Could not create user"};
+        var createdUserId = await _userService.CreateUserAsync(user, password);
+        user.Id = createdUserId;
 
         return await GenerateTokenForUserAsync(user);
     }
