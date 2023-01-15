@@ -67,7 +67,7 @@ public class AuthorizationTests
         res.Success.Should().BeTrue();
         res.Message.Should().BeNull();
         res.Token.Should().NotBeNull();
-        res.Token.RefreshToken.Should().NotBeNull();
+        res.Token!.RefreshToken.Should().NotBeNull();
         res.Token.AccessToken.Should().NotBeNull();
     }
 }
