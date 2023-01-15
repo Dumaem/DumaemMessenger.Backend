@@ -35,9 +35,11 @@ public class UserService : IUserService
         throw new NotImplementedException();
     }
 
-    public Task<bool> CheckUserPasswordAsync(User user, string password)
+    public async Task<bool> CheckUserPasswordAsync(int userId, string password)
     {
-        // TODO: избавиться от затычки
-        return Task.FromResult(true);
+        var encryptedPassword = await _encryptionService.EncryptString(password);
+        var storedUserPassword = await _userRepository.GetUserEncryptedPassword(userId);
+
+        return encryptedPassword.Equals(storedUserPassword);
     }
 }

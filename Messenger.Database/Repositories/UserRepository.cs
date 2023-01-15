@@ -22,13 +22,13 @@ public class UserRepository : IUserRepository
     public async Task<User?> GetUserByEmailAsync(string email)
     {
         var res = await _readonlyContext.Connection.QuerySingleOrDefaultAsync<UserDb>(
-            UserRepositoryQueries.GetUserByEmailQuery, new {email});
+            UserRepositoryQueries.GetUserByEmail, new {email});
 
         return res is null
             ? null
             : new User
             {
-                Username = res.Username, Name = res.Name, Email = res.Email
+                Username = res.Username, Name = res.Name, Email = res.Email, Id = res.Id
             };
     }
 
@@ -42,5 +42,11 @@ public class UserRepository : IUserRepository
         _context.Users.Add(dbUser);
         await _context.SaveChangesAsync();
         return dbUser.Id;
+    }
+
+    public async Task<string> GetUserEncryptedPassword(int userId)
+    {
+        return await _readonlyContext.Connection.QuerySingleOrDefaultAsync<string>(
+            UserRepositoryQueries.GetUserEncryptedPassword, new {id = userId});
     }
 }

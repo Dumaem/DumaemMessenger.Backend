@@ -49,7 +49,7 @@ public class AuthorizationService : IAuthorizationService
         if (existingUser is null)
             return new AuthenticationResult {Success = false, Message = "User does not exist"};
 
-        var isPasswordValid = await _userService.CheckUserPasswordAsync(existingUser, password);
+        var isPasswordValid = await _userService.CheckUserPasswordAsync(existingUser.Id, password);
 
         if (!isPasswordValid)
             return new AuthenticationResult {Success = false, Message = "User has wrong password"};
