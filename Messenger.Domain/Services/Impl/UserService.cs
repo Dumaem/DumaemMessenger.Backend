@@ -22,8 +22,7 @@ public class UserService : IUserService
 
     public async Task<User?> GetUserByEmailAsync(string email)
     {
-        // TODO: избавиться от затычки
-        return new User { Email = "123123" };
+        return await _userRepository.GetUserByEmailAsync(email);
     }
 
     public Task<User?> GetUserByIdAsync(int id)
