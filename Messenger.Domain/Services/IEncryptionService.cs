@@ -2,5 +2,5 @@
 
 public interface IEncryptionService
 {
-    public Task<string> EncryptString(string content);
+    public Task<string> EncryptStringAsync(string content);
 }
