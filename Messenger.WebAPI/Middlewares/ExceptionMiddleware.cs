@@ -31,7 +31,7 @@ public class ExceptionMiddleware
             context.Response.StatusCode = StatusCodes.Status400BadRequest;
             await context.Response.WriteAsJsonAsync(new
             {
-                e.Message
+                e.Errors
             });
         }
         catch (Exception e)
