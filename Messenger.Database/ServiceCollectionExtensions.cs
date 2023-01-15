@@ -1,4 +1,5 @@
-﻿using Messenger.Database.Repositories;
+﻿using Messenger.Database.Read;
+using Messenger.Database.Repositories;
 using Messenger.Database.Write;
 using Messenger.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +22,10 @@ public static class ServiceCollectionExtensions
         IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection")!;
-        services.AddScoped<NgpsqlContext>(_ => new NgpsqlContext(connectionString));
+
+        Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
+        services.AddScoped<MessengerReadonlyContext>(_ => new MessengerReadonlyContext(connectionString));
+
         services.AddDbContext<MessengerContext>(options =>
         {
             options.UseNpgsql(connectionString,
