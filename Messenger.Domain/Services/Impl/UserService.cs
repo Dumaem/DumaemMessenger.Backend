@@ -14,7 +14,7 @@ public class UserService : IUserService
         _encryptionService = encryptionService;
     }
 
-    public async Task<int?> CreateUserAsync(User user, string password)
+    public async Task<int> CreateUserAsync(User user, string password)
     {
         var encryptedPassword = await _encryptionService.EncryptString(password);
         return await _userRepository.CreateUserAsync(user, encryptedPassword);
