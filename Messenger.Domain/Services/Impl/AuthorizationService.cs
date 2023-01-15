@@ -39,7 +39,7 @@ public class AuthorizationService : IAuthorizationService
 
         var isUserCreated = await _userService.CreateUserAsync(user, password);
 
-        if (isUserCreated is not null)
+        if (isUserCreated is null)
             return new AuthenticationResult {Success = false, Message = "Could not create user"};
 
         return await GenerateTokenForUserAsync(user);
