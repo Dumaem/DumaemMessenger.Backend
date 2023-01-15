@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Messenger.WebAPI", "Messenger.WebAPI\Messenger.WebAPI.csproj", "{5D62E76F-E03F-42D6-9BE5-2C1A12E724B4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Messenger.Tests", "Messenger.Tests\Messenger.Tests.csproj", "{A8E5EF0F-7A5C-44A3-890E-1C4924484D18}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Messenger.Domain.Tests", "Messenger.Domain.Tests\Messenger.Domain.Tests.csproj", "{A8E5EF0F-7A5C-44A3-890E-1C4924484D18}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Messenger.Domain", "Messenger.Domain\Messenger.Domain.csproj", "{49CD72E5-CB6F-460A-85DC-E7D01DC0EB53}"
 EndProject
