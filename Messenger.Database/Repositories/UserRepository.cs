@@ -32,6 +32,19 @@ public class UserRepository : IUserRepository
             };
     }
 
+    public async Task<User?> GetUserByIdAsync(int id)
+    {
+        var res = await _readonlyContext.Connection.QuerySingleOrDefaultAsync<UserDb>(
+            UserRepositoryQueries.GetUserById, new {id});
+
+        return res is null
+            ? null
+            : new User
+            {
+                Username = res.Username, Name = res.Name, Email = res.Email, Id = res.Id
+            };
+    }
+
     public async Task<int> CreateUserAsync(User user, string password)
     {
         var dbUser = new UserDb

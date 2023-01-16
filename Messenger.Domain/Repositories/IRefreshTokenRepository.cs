@@ -10,5 +10,5 @@ public interface IRefreshTokenRepository
     /// <summary>
     /// Sets the IsUsed property to true 
     /// </summary>
-    Task UseTokenAsync();
+    Task UseTokenAsync(int tokenId);
 }

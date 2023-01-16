@@ -1,4 +1,7 @@
-﻿using Messenger.Database.Models;
+﻿using Dapper;
+using Messenger.Database.Models;
+using Messenger.Database.Read;
+using Messenger.Database.Read.Queries;
 using Messenger.Database.Write;
 using Messenger.Domain.Models;
 using Messenger.Domain.Repositories;
@@ -8,10 +11,12 @@ namespace Messenger.Database.Repositories;
 public class RefreshTokenRepository : IRefreshTokenRepository
 {
     private readonly MessengerContext _context;
+    private readonly MessengerReadonlyContext _readonlyContext;
 
-    public RefreshTokenRepository(MessengerContext context)
+    public RefreshTokenRepository(MessengerContext context, MessengerReadonlyContext readonlyContext)
     {
         _context = context;
+        _readonlyContext = readonlyContext;
     }
 
     public async Task CreateTokenAsync(RefreshToken refreshToken)
@@ -26,13 +31,28 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         await _context.SaveChangesAsync();
     }
 
-    public Task<RefreshToken?> GetTokenAsync(string token)
+    public async Task<RefreshToken?> GetTokenAsync(string token)
     {
-        throw new NotImplementedException();
+        var res = await _readonlyContext.Connection.QuerySingleOrDefaultAsync<RefreshTokenDb>(
+            RefreshTokenRepositoryQueries.GetRefreshToken, new {token});
+        
+        return res is null
+            ? null
+            : new RefreshToken
+            {
+                Id = res.Id,
+                JwtId = res.JwtId,
+                IsUsed = res.IsUsed,
+                IsRevoked = res.IsRevoked,
+                CreationDate = res.CreationDate,
+                ExpiryDate = res.ExpiryDate,
+                UserId = res.UserId
+            };
     }
 
-    public Task UseTokenAsync()
+    public async Task UseTokenAsync(int tokenId)
     {
-        throw new NotImplementedException();
+        await  _readonlyContext.Connection.ExecuteAsync(RefreshTokenRepositoryQueries.UpdateRefreshTokenUse,
+                                                                                        new {Id = tokenId});
     }
 }
