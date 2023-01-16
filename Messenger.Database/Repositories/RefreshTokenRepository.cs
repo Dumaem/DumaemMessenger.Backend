@@ -53,9 +53,6 @@ public class RefreshTokenRepository : IRefreshTokenRepository
     public async Task UseTokenAsync(int tokenId)
     {
         var res = await _readonlyContext.Connection.QuerySingleOrDefaultAsync<RefreshTokenDb>(
-            RefreshTokenRepositoryQueries.GetRefreshTokenById, new {Id = tokenId});
-
-        res.IsUsed = true;
-        await _context.SaveChangesAsync();
+            RefreshTokenRepositoryQueries.UpdateRefreshTokenUse, new {Id = tokenId});
     }
 }
