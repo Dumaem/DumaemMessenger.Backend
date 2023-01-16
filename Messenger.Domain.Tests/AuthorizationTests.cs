@@ -56,4 +56,56 @@ public class AuthorizationTests
         res.Token!.RefreshToken.Should().NotBeNull();
         res.Token.AccessToken.Should().NotBeNull();
     }
+    
+    
+    [Fact]
+    public async Task AuthorizeAsync_NotExistUser_ShouldReturnUnsuccessfulResult()
+    {
+        _userServiceMock.Setup(x => x.GetUserByEmailAsync(It.IsAny<string>())).ReturnsAsync((User?) null);
+        
+        var res = await _authorizationService.AuthorizeAsync(It.IsAny<string>(),
+            It.IsAny<string>());
+        
+        res.Should().BeOfType<AuthenticationResult>();
+        res.Success.Should().BeFalse();
+        res.Message.Should().Be("User does not exist");
+    }
+
+    [Fact]
+    public async Task AuthorizeAsync_WrongPassword_ShouldReturnUnsuccessfulResult()
+    {
+        _userServiceMock.Setup(x => x.GetUserByEmailAsync(It.IsAny<string>())).ReturnsAsync(new User());
+        _userServiceMock.Setup(x => x.CheckUserPasswordAsync(It.IsAny<int>(),
+                It.IsAny<string>())).ReturnsAsync(false);
+
+        var res = await _authorizationService.AuthorizeAsync(It.IsAny<string>(), It.IsAny<string>());
+        
+        res.Should().BeOfType<AuthenticationResult>();
+        res.Success.Should().BeFalse();
+        res.Message.Should().Be("User has wrong password");
+    }
+    
+    [Fact]
+    public async Task AuthorizeAsync_SuccessPath_ShouldReturnSuccessfulResult()
+    {
+        _userServiceMock.Setup(x => x.GetUserByEmailAsync(It.IsAny<string>())).ReturnsAsync(new User
+        {
+            Name = It.IsAny<string>(),
+            Username = It.IsAny<string>(),
+            Email = "1",
+            Id = 1,
+            Password = It.IsAny<string>()
+        });
+        _userServiceMock.Setup(x => x.CheckUserPasswordAsync(It.IsAny<int>(),
+            It.IsAny<string>())).ReturnsAsync(true);
+        _jwtSettingsMock.SetupJwtSettingsMock();
+
+        var res = await _authorizationService.AuthorizeAsync(It.IsAny<string>(), It.IsAny<string>());
+
+        res.Success.Should().BeTrue();
+        res.Message.Should().BeNull();
+        res.Token.Should().NotBeNull();
+        res.Token!.RefreshToken.Should().NotBeNull();
+        res.Token.AccessToken.Should().NotBeNull();
+    }
 }
