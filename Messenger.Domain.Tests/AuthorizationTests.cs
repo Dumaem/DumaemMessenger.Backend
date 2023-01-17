@@ -101,7 +101,8 @@ public class AuthorizationTests
         _jwtSettingsMock.SetupJwtSettingsMock();
 
         var res = await _authorizationService.AuthorizeAsync(It.IsAny<string>(), It.IsAny<string>());
-
+    
+        res.Should().BeOfType<AuthenticationResult>();
         res.Success.Should().BeTrue();
         res.Message.Should().BeNull();
         res.Token.Should().NotBeNull();
