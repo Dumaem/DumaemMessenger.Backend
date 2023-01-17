@@ -52,7 +52,7 @@ public class RefreshTokenRepository : IRefreshTokenRepository
 
     public async Task UseTokenAsync(int tokenId)
     {
-        await  _readonlyContext.Connection.ExecuteAsync(RefreshTokenRepositoryQueries.UpdateRefreshTokenUse,
-                                                                                        new {Id = tokenId});
+        await  _readonlyContext.Connection
+            .ExecuteAsync(RefreshTokenRepositoryQueries.UpdateRefreshTokenUse, new {Id = tokenId});
     }
 }
