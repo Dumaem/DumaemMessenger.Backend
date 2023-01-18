@@ -17,4 +17,6 @@ public class Message
     public long? RepliedMessageId { get; set; }
 
     public long? ForwardedMessageId { get; set; }
+
+    public MessageContent? Content { get; set; }
 }

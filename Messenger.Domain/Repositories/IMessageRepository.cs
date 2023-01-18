@@ -11,6 +11,7 @@ namespace Messenger.Domain.Repositories
     {
         Task<long> CreateMessageAsync(Message message);
         Task<Message> GetMessageByIdAsync(long id);
-        Task<bool> EditMessageByIdAsync(long id, Message editedMessage);
+        Task EditMessageByIdAsync(long id, Message editedMessage);
+        Task DeleteMessageForUserAsync(long deletedMessageId);
     }
 }

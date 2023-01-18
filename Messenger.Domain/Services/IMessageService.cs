@@ -4,7 +4,7 @@ namespace Messenger.Domain.Services
 {
     public interface IMessageService
     {
-        Task<bool> SendMessageAsync(Chat chat);
+        Task<bool> SendMessageAsync(Chat chat, User user, byte[] content);
         Task<bool> DeleteMessageAsync(Message message, bool isForAll);
         Task<bool> ReadMessageAsync(Message message);
         Task<bool> ReplyMessageAsync(Message message);

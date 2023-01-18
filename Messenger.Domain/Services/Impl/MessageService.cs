@@ -1,6 +1,8 @@
 ﻿using Messenger.Domain.Models;
+using Messenger.Domain.Repositories;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,39 +11,77 @@ namespace Messenger.Domain.Services.Impl
 {
     public class MessageService : IMessageService
     {
-        public MessageService()
+        private readonly IMessageRepository _messageRepository;
+        private readonly IUserRepository _userRepository;
+        public MessageService(IMessageRepository messageRepository, IUserRepository userRepository)
         {
-
+            _messageRepository = messageRepository;
+            _userRepository = userRepository;
         }
 
-        public Task<bool> DeleteMessageAsync(Message message, bool isForAll)
+        public async Task DeleteMessageAsync(long messageId, bool isForAll, int userId)
+        {
+            if (isForAll)
+            {
+                var message = await _messageRepository.GetMessageByIdAsync(messageId);
+                message.IsDeleted = true;
+                await _messageRepository.EditMessageByIdAsync(messageId, message);
+
+                return;
+            }
+
+            var user = _userRepository.GetUserByIdAsync(userId);
+            DeletedMessage deletedMessage = new DeletedMessage()
+            {
+                MessageId = messageId,
+                UserId = user.Id,
+            };
+            await _messageRepository.DeleteMessageForUserAsync(deletedMessage.Id);
+        }
+
+        public Task<bool> EditMessageAsync(long messageId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> EditMessageAsync(Message message)
+        public Task<bool> ForwardMessageAsync(long messageId, int chatId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> ForwardMessageAsync(Message message, Chat chat)
+        public Task<bool> ReadMessageAsync(long messageId)
+        {
+            var message = _messageRepository.GetMessageByIdAsync(messageId);
+            string id = message.SenderId
+            var readMessage = new ReadMessage()
+            {
+                MessageId = messageId,
+            };
+        }
+
+        public Task<bool> ReplyMessageAsync(long messageId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> ReadMessageAsync(Message message)
+        public async Task SendMessageAsync(Chat chat, User user, byte[] content)
         {
-            throw new NotImplementedException();
-        }
+            Message newMessage = new Message()
+            {
+                ChatId = chat.Id,
+                DateOfDispatch = DateTime.Now,
+                IsDeleted = false,
+                IsEdited = false,
+                SenderId = user.Id,
+                Content = new MessageContent()
+                {
+                    /// убрать TypeId = 1 в будущем
+                    Content = content,
+                    TypeId = 1
+                }
+            };
 
-        public Task<bool> ReplyMessageAsync(Message message)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> SendMessageAsync(Chat chat)
-        {
-            throw new NotImplementedException();
+            await _messageRepository.CreateMessageAsync(newMessage);
         }
     }
 }

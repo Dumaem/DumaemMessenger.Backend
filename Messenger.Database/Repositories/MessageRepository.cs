@@ -5,6 +5,7 @@ using Messenger.Database.Read.Queries;
 using Messenger.Database.Write;
 using Messenger.Domain.Models;
 using Messenger.Domain.Repositories;
+using Microsoft.AspNetCore.SignalR.Protocol;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,7 +44,7 @@ namespace Messenger.Database.Repositories
             return dbMessage.Id;
         }
 
-        public async Task<bool> EditMessageByIdAsync(long id, Message editedMessage)
+        public async Task EditMessageByIdAsync(long id, Message editedMessage)
         {
             var message  = _context.Messages.SingleOrDefault(m => m.Id == id);
 
@@ -56,7 +57,8 @@ namespace Messenger.Database.Repositories
             message.IsEdited = true;
             message.IsDeleted = editedMessage.IsDeleted;
 
-            return true;
+            _context.Messages.Update(message);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<Message?> GetMessageByIdAsync(long id)
@@ -77,6 +79,20 @@ namespace Messenger.Database.Repositories
                     ForwardedMessageId= res.ForwardedMessageId,
                     RepliedMessageId = res.RepliedMessageId
                 };
+        }
+
+        public async Task DeleteMessageForUserAsync(long deletedMessageId)
+        {
+            var deletedMessage = _context.DeletedMessages.SingleOrDefault(m => m.Id == deletedMessageId);
+
+            DeletedMessageDb deletedMessageDb = new DeletedMessageDb()
+            {
+                MessageId = deletedMessage.MessageId,
+                UserId = deletedMessage.UserId
+            };
+
+            _context.DeletedMessages.Add(deletedMessageDb);
+            await _context.SaveChangesAsync();
         }
     }
 }
