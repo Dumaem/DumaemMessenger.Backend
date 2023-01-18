@@ -46,12 +46,12 @@ namespace Messenger.Database.Repositories
 
         public async Task EditMessageByIdAsync(long id, Message editedMessage)
         {
-            var message  = _context.Messages.SingleOrDefault(m => m.Id == id);
+            var message = _context.Messages.SingleOrDefault(m => m.Id == id);
 
             message.Id = editedMessage.Id;
             message.SenderId = editedMessage.SenderId;
             message.RepliedMessageId = editedMessage.RepliedMessageId;
-            message.ForwardedMessageId= editedMessage.ForwardedMessageId;
+            message.ForwardedMessageId = editedMessage.ForwardedMessageId;
             message.ChatId = editedMessage.ChatId;
             message.DateOfDispatch = editedMessage.DateOfDispatch;
             message.IsEdited = true;
@@ -71,12 +71,12 @@ namespace Messenger.Database.Repositories
                 : new Message
                 {
                     Id = res.Id,
-                    ChatId= res.ChatId,
+                    ChatId = res.ChatId,
                     DateOfDispatch = res.DateOfDispatch,
-                    IsDeleted= res.IsDeleted,
-                    IsEdited= res.IsEdited,
-                    SenderId= res.SenderId,
-                    ForwardedMessageId= res.ForwardedMessageId,
+                    IsDeleted = res.IsDeleted,
+                    IsEdited = res.IsEdited,
+                    SenderId = res.SenderId,
+                    ForwardedMessageId = res.ForwardedMessageId,
                     RepliedMessageId = res.RepliedMessageId
                 };
         }
@@ -92,6 +92,19 @@ namespace Messenger.Database.Repositories
             };
 
             _context.DeletedMessages.Add(deletedMessageDb);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task CreateReadMessage(long messageId, int userId)
+        {
+            var message = _context.Messages.SingleOrDefault(m => m.Id <= messageId);
+
+            ReadMessageDb readMessageDb = new ReadMessageDb()
+            {
+                MessageId = messageId,
+                UserId = userId
+            };
+            _context.ReadMessages.Add(readMessageDb);
             await _context.SaveChangesAsync();
         }
     }

@@ -49,14 +49,16 @@ namespace Messenger.Domain.Services.Impl
             throw new NotImplementedException();
         }
 
-        public Task<bool> ReadMessageAsync(long messageId)
+        public async Task<bool> ReadMessageAsync(long messageId, int userId)
         {
-            var message = _messageRepository.GetMessageByIdAsync(messageId);
-            string id = message.SenderId
+            var message = await _messageRepository.GetMessageByIdAsync(messageId);
+
             var readMessage = new ReadMessage()
             {
                 MessageId = messageId,
+                UserId = userId
             };
+            _messageRepository.CreateReadMessageAsync(readMessage.Id);
         }
 
         public Task<bool> ReplyMessageAsync(long messageId)
