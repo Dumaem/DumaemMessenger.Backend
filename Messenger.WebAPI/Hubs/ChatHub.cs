@@ -1,12 +1,17 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using System.Text.Json;
+using Messenger.WebAPI.Credentials;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Messenger.WebAPI.Hubs;
 
 public class ChatHub : Hub
 {
-    public Task SendMessage(string message)
+    public Task SendMessage(MessageContext message)
     {
-        var userId = Context.User.Identity.Name;
+        string userId = Context.UserIdentifier;
+        var auth = Context.Items["Headers"];
+        var http = Context.GetHttpContext();
+        var headers = http?.Request.Headers;
         return Clients.Others.SendAsync("Send", message);
     }
 }
