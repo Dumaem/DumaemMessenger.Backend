@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using FluentValidation;
 using Messenger.Database.Models;
 using Messenger.Database.Read;
 using Messenger.Database.Read.Queries;
@@ -48,8 +49,6 @@ namespace Messenger.Database.Repositories
         {
             var message = _context.Messages.SingleOrDefault(m => m.Id == id);
 
-            message.Id = editedMessage.Id;
-            message.SenderId = editedMessage.SenderId;
             message.RepliedMessageId = editedMessage.RepliedMessageId;
             message.ForwardedMessageId = editedMessage.ForwardedMessageId;
             message.ChatId = editedMessage.ChatId;
@@ -81,14 +80,14 @@ namespace Messenger.Database.Repositories
                 };
         }
 
-        public async Task DeleteMessageForUserAsync(long deletedMessageId)
+        public async Task DeleteMessageForUserAsync(long deletedMessageId, int userId)
         {
-            var deletedMessage = _context.DeletedMessages.SingleOrDefault(m => m.Id == deletedMessageId);
+            var deletedMessage = _context.Messages.SingleOrDefault(m => m.Id == deletedMessageId)??throw new ValidationException("No message found");
 
             DeletedMessageDb deletedMessageDb = new DeletedMessageDb()
             {
-                MessageId = deletedMessage.MessageId,
-                UserId = deletedMessage.UserId
+                MessageId = deletedMessageId,
+                UserId = userId
             };
 
             _context.DeletedMessages.Add(deletedMessageDb);
