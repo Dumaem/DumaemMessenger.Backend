@@ -80,14 +80,14 @@ namespace Messenger.Database.Repositories
                 };
         }
 
-        public async Task DeleteMessageForUserAsync(long deletedMessageId, int userId)
+        public async Task DeleteMessageForUserAsync(long deletedMessageId, int? userId)
         {
             var deletedMessage = _context.Messages.SingleOrDefault(m => m.Id == deletedMessageId)??throw new ValidationException("No message found");
 
             DeletedMessageDb deletedMessageDb = new DeletedMessageDb()
             {
                 MessageId = deletedMessageId,
-                UserId = userId
+                UserId = (int)userId
             };
 
             _context.DeletedMessages.Add(deletedMessageDb);
@@ -96,8 +96,6 @@ namespace Messenger.Database.Repositories
 
         public async Task CreateReadMessage(long messageId, int userId)
         {
-            var message = _context.Messages.SingleOrDefault(m => m.Id <= messageId);
-
             ReadMessageDb readMessageDb = new ReadMessageDb()
             {
                 MessageId = messageId,

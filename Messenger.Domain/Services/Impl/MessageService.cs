@@ -54,12 +54,7 @@ namespace Messenger.Domain.Services.Impl
         public async Task<bool> ReadMessageAsync(long messageId, int userId)
         {
             // Use the repository to mark the message as read
-            ReadMessage readMessage = new ReadMessage()
-            {
-                MessageId = messageId,
-                UserId = userId
-            };
-            await _messageRepository.CreateReadMessage(readMessage);
+            await _messageRepository.CreateReadMessage(messageId, userId);
             return true;
         }
 
@@ -96,7 +91,7 @@ namespace Messenger.Domain.Services.Impl
 
         public async Task<bool> EditMessageAsync(long messageId, byte[] content, int messageTypeId)
         {
-            var message = await _messageRepository.GetMessageByIdAsync(messageId);
+            var message = await _messageRepository?.GetMessageByIdAsync(messageId);
             // Use the repository to update the message's content
             message.Content = new MessageContent { Content = content, TypeId = messageTypeId };
             await _messageRepository.EditMessageByIdAsync(messageId, message);
