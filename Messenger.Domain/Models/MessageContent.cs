@@ -7,4 +7,6 @@ public class MessageContent
     public byte[] Content { get; set; } = null!;
 
     public int TypeId { get; set; }
+
+    public long MessageId { get; set; }
 }
