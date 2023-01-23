@@ -3,6 +3,7 @@ using Messenger.Domain.Repositories;
 using Messenger.Domain.Services;
 using Messenger.Domain.Services.Impl;
 using Messenger.Domain.Settings;
+using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Messenger.Domain.Tests;
@@ -33,7 +34,7 @@ public class AuthorizationTests
         _userServiceMock.Setup(x => x.GetUserByEmailAsync(It.IsAny<string>())).ReturnsAsync(new User());
 
         var res = await _authorizationService.RegisterAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
-            It.IsAny<string>());
+            It.IsAny<string>(), It.IsAny<string>());
 
         res.Should().BeOfType<AuthenticationResult>();
         res.Success.Should().BeFalse();
@@ -48,7 +49,7 @@ public class AuthorizationTests
         _jwtSettingsMock.SetupJwtSettingsMock();
 
         var res = await _authorizationService.RegisterAsync(string.Empty, string.Empty, string.Empty,
-            It.IsAny<string>());
+            It.IsAny<string>(), It.IsAny<string>());
 
         res.Success.Should().BeTrue();
         res.Message.Should().BeNull();
@@ -64,7 +65,7 @@ public class AuthorizationTests
         _userServiceMock.Setup(x => x.GetUserByEmailAsync(It.IsAny<string>())).ReturnsAsync((User?) null);
         
         var res = await _authorizationService.AuthorizeAsync(It.IsAny<string>(),
-            It.IsAny<string>());
+            It.IsAny<string>(), It.IsAny<string>());
         
         res.Should().BeOfType<AuthenticationResult>();
         res.Success.Should().BeFalse();
@@ -78,7 +79,8 @@ public class AuthorizationTests
         _userServiceMock.Setup(x => x.CheckUserPasswordAsync(It.IsAny<int>(),
                 It.IsAny<string>())).ReturnsAsync(false);
 
-        var res = await _authorizationService.AuthorizeAsync(It.IsAny<string>(), It.IsAny<string>());
+        var res = await _authorizationService.AuthorizeAsync(It.IsAny<string>(),
+            It.IsAny<string>(), It.IsAny<string>());
         
         res.Should().BeOfType<AuthenticationResult>();
         res.Success.Should().BeFalse();
@@ -100,7 +102,8 @@ public class AuthorizationTests
             It.IsAny<string>())).ReturnsAsync(true);
         _jwtSettingsMock.SetupJwtSettingsMock();
 
-        var res = await _authorizationService.AuthorizeAsync(It.IsAny<string>(), It.IsAny<string>());
+        var res = await _authorizationService.AuthorizeAsync(It.IsAny<string>(),
+            It.IsAny<string>(), It.IsAny<string>());
     
         res.Should().BeOfType<AuthenticationResult>();
         res.Success.Should().BeTrue();

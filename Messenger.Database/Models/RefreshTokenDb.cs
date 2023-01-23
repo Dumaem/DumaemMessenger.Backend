@@ -23,6 +23,8 @@ public class RefreshTokenDb
     public DateTime ExpiryDate { get; set; }
 
     public int UserId { get; set; }
+    
+    public string DeviceId { get; set; } = null!;
 
     public virtual UserDb User { get; set; } = null!;
 }

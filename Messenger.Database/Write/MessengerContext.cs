@@ -169,6 +169,9 @@ public class MessengerContext : DbContext
             entity.Property(e => e.Token)
                 .HasMaxLength(250)
                 .HasColumnName("token");
+            entity.Property(e => e.DeviceId)
+                .HasMaxLength(250)
+                .HasColumnName("device_id");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.User).WithMany(p => p.RefreshTokens)

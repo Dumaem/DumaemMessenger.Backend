@@ -1,9 +1,13 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using DeviceDetectorNET;
 using Messenger.Domain.Models;
 using Messenger.Domain.Repositories;
 using Messenger.Domain.Settings;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Headers;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Messenger.Domain.Services.Impl;
@@ -24,7 +28,8 @@ public class AuthorizationService : IAuthorizationService
         _refreshTokenRepository = refreshTokenRepository;
     }
 
-    public async Task<AuthenticationResult> RegisterAsync(string name, string email, string password, string? username)
+    public async Task<AuthenticationResult> RegisterAsync(string name, string email, string password, string? username,
+        string userAgent)
     {
         var existingUser = await _userService.GetUserByEmailAsync(email);
 
@@ -39,10 +44,10 @@ public class AuthorizationService : IAuthorizationService
         var createdUserId = await _userService.CreateUserAsync(user, password);
         user.Id = createdUserId;
 
-        return await GenerateTokenForUserAsync(user);
+        return await GenerateTokenForUserAsync(user, userAgent);
     }
 
-    public async Task<AuthenticationResult> AuthorizeAsync(string email, string password)
+    public async Task<AuthenticationResult> AuthorizeAsync(string email, string password, string userAgent)
     {
         var existingUser = await _userService.GetUserByEmailAsync(email);
 
@@ -54,10 +59,10 @@ public class AuthorizationService : IAuthorizationService
         if (!isPasswordValid)
             return new AuthenticationResult {Success = false, Message = "User has wrong password"};
 
-        return await GenerateTokenForUserAsync(existingUser);
+        return await GenerateTokenForUserAsync(existingUser, userAgent);
     }
 
-    public async Task<AuthenticationResult> RefreshAsync(string token, string refreshToken)
+    public async Task<AuthenticationResult> RefreshAsync(string token, string refreshToken, string userAgent)
     {
         var validatedToken = GetPrincipalFromToken(token);
 
@@ -80,7 +85,7 @@ public class AuthorizationService : IAuthorizationService
         int.TryParse(validatedToken.Claims.Single(x => x.Type == "id").Value, out var userId);
         var user = await _userService.GetUserByIdAsync(userId);
 
-        return await GenerateTokenForUserAsync(user!);
+        return await GenerateTokenForUserAsync(user!, userAgent);
     }
 
     private ClaimsPrincipal? GetPrincipalFromToken(string token)
@@ -107,7 +112,7 @@ public class AuthorizationService : IAuthorizationService
                    StringComparison.InvariantCultureIgnoreCase);
     }
 
-    private async Task<AuthenticationResult> GenerateTokenForUserAsync(User user)
+    private async Task<AuthenticationResult> GenerateTokenForUserAsync(User user, string userAgent)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_jwtSettings.Key);
@@ -124,12 +129,14 @@ public class AuthorizationService : IAuthorizationService
             SigningCredentials =
                 new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
-
+        
+        var deviceId = GenerateDeviceId(userAgent);
         var accessToken = tokenHandler.CreateToken(tokenDescriptor);
         var refreshToken = new RefreshToken
         {
             JwtId = accessToken.Id,
             UserId = user.Id,
+            DeviceId = deviceId,
             CreationDate = DateTime.UtcNow,
             ExpiryDate = DateTime.UtcNow.AddMonths(_jwtSettings.RefreshTokenMonthLifetime)
         };
@@ -145,5 +152,18 @@ public class AuthorizationService : IAuthorizationService
                 RefreshToken = refreshToken.Token
             }
         };
+    }
+
+    private string GenerateDeviceId(string userAgent)
+    {
+        DeviceDetector dd = new(userAgent);
+        dd.Parse();
+
+        var deviceBrand = dd.GetBrand();
+        var deviceModel = dd.GetModel();
+
+        var deviceId = deviceBrand + deviceModel;
+
+        return deviceId;
     }
 }
