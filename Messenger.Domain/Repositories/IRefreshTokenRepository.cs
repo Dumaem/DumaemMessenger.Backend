@@ -11,4 +11,7 @@ public interface IRefreshTokenRepository
     /// Sets the IsUsed property to true 
     /// </summary>
     Task UseTokenAsync(int tokenId);
+
+    Task RevokeTokenAsync(string refreshToken);
+    Task<RefreshToken?> GetTokenByUserAndDeviceIdAsync(int userId, string deviceId);
 }

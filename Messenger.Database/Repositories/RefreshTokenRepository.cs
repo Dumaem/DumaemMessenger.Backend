@@ -53,6 +53,32 @@ public class RefreshTokenRepository : IRefreshTokenRepository
     public async Task UseTokenAsync(int tokenId)
     {
         await  _readonlyContext.Connection
-            .ExecuteAsync(RefreshTokenRepositoryQueries.UpdateRefreshTokenUse, new {Id = tokenId});
+            .ExecuteAsync(RefreshTokenRepositoryQueries.UpdateRefreshTokenUse, new {id = tokenId});
+    }
+    
+    public async Task RevokeTokenAsync(string refreshToken)
+    {
+        await  _readonlyContext.Connection
+            .ExecuteAsync(RefreshTokenRepositoryQueries.UpdateRefreshTokenRevoke, new {token = refreshToken});
+    }
+
+    public async Task<RefreshToken?> GetTokenByUserAndDeviceIdAsync(int userId, string deviceId)
+    {
+       var res =  await _readonlyContext.Connection
+            .QuerySingleOrDefaultAsync(RefreshTokenRepositoryQueries.GetTokenByUserAndDeviceIdAsync,
+                new {userId, deviceId});
+       
+       return res is null
+           ? null
+           : new RefreshToken
+           {
+               Id = res.Id,
+               JwtId = res.JwtId,
+               IsUsed = res.IsUsed,
+               IsRevoked = res.IsRevoked,
+               CreationDate = res.CreationDate,
+               ExpiryDate = res.ExpiryDate,
+               UserId = res.UserId
+           };
     }
 }

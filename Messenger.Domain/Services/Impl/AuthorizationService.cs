@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Text;
 using DeviceDetectorNET;
+using Messenger.Domain.ErrorMessages;
 using Messenger.Domain.Models;
 using Messenger.Domain.Repositories;
 using Messenger.Domain.Settings;
@@ -18,14 +19,16 @@ public class AuthorizationService : IAuthorizationService
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly JwtSettings _jwtSettings;
     private readonly TokenValidationParameters _tokenValidationParameters;
+    private readonly IEncryptionService _encryptionService;
 
     public AuthorizationService(IUserService userService, JwtSettings jwtSettings,
-        TokenValidationParameters tokenValidationParameters, IRefreshTokenRepository refreshTokenRepository)
+        TokenValidationParameters tokenValidationParameters, IRefreshTokenRepository refreshTokenRepository, IEncryptionService encryptionService)
     {
         _userService = userService;
         _jwtSettings = jwtSettings;
         _tokenValidationParameters = tokenValidationParameters;
         _refreshTokenRepository = refreshTokenRepository;
+        _encryptionService = encryptionService;
     }
 
     public async Task<AuthenticationResult> RegisterAsync(string name, string email, string password, string? username,
@@ -67,7 +70,7 @@ public class AuthorizationService : IAuthorizationService
         var validatedToken = GetPrincipalFromToken(token);
 
         if (validatedToken == null)
-            return new AuthenticationResult {Success = false, Message = "Invalid token"};
+            return new AuthenticationResult {Success = false, Message = RefreshTokenErrorMessages.InvalidToken};
 
         var jti = validatedToken.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
 
@@ -75,10 +78,10 @@ public class AuthorizationService : IAuthorizationService
 
         if (storedRefreshToken is null || storedRefreshToken.ExpiryDate < DateTime.UtcNow ||
             storedRefreshToken.JwtId != jti)
-            return new AuthenticationResult {Success = false, Message = "Invalid token"};
+            return new AuthenticationResult {Success = false, Message = RefreshTokenErrorMessages.InvalidToken};
 
         if (storedRefreshToken.IsRevoked || storedRefreshToken.IsUsed)
-            return new AuthenticationResult {Success = false, Message = "Token is already used"};
+            return new AuthenticationResult {Success = false, Message = RefreshTokenErrorMessages.UsedToken};
 
         await _refreshTokenRepository.UseTokenAsync(storedRefreshToken.Id);
 
@@ -114,6 +117,11 @@ public class AuthorizationService : IAuthorizationService
 
     private async Task<AuthenticationResult> GenerateTokenForUserAsync(User user, string userAgent)
     {
+        var deviceId = await GenerateDeviceId(userAgent);
+        var res = await RevokeTokenIfExists(user.Id, deviceId);
+        if (!res.Success)
+            return res;
+
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_jwtSettings.Key);
         var tokenDescriptor = new SecurityTokenDescriptor
@@ -123,14 +131,14 @@ public class AuthorizationService : IAuthorizationService
                 new Claim(JwtRegisteredClaimNames.Sub, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim("id", user.Id.ToString())
+                new Claim("id", user.Id.ToString()),
+                new Claim("deviceId", deviceId)
             }),
             Expires = DateTime.UtcNow.Add(_jwtSettings.AccessTokenLifetime),
             SigningCredentials =
                 new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
-        
-        var deviceId = GenerateDeviceId(userAgent);
+
         var accessToken = tokenHandler.CreateToken(tokenDescriptor);
         var refreshToken = new RefreshToken
         {
@@ -154,16 +162,33 @@ public class AuthorizationService : IAuthorizationService
         };
     }
 
-    private string GenerateDeviceId(string userAgent)
+    private async Task<string> GenerateDeviceId(string userAgent)
     {
         DeviceDetector dd = new(userAgent);
         dd.Parse();
 
-        var deviceBrand = dd.GetBrand();
-        var deviceModel = dd.GetModel();
+        var deviceClient = dd.GetClient();
 
-        var deviceId = deviceBrand + deviceModel;
+        var deviceId = await _encryptionService.EncryptStringAsync(deviceClient.ToString());
 
         return deviceId;
+    }
+
+    private async Task<AuthenticationResult> RevokeTokenIfExists(int userId, string deviceId)
+    {
+        var tokenForRevoke = await _refreshTokenRepository.GetTokenByUserAndDeviceIdAsync(userId, deviceId);
+        if (tokenForRevoke is null)
+        {
+            return new AuthenticationResult {Success = false, Message = RefreshTokenErrorMessages.InvalidToken};
+        }
+
+        if (tokenForRevoke.IsUsed || tokenForRevoke.IsRevoked)
+            return new AuthenticationResult {Success = false, Message = RefreshTokenErrorMessages.UsedToken};
+
+        await _refreshTokenRepository.RevokeTokenAsync(tokenForRevoke.Token);
+        return new AuthenticationResult
+        {
+            Success = true
+        };
     }
 }

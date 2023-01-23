@@ -24,7 +24,7 @@ public static class ServiceCollectionExtensions
         var connectionString = configuration.GetConnectionString("DefaultConnection")!;
 
         Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
-        services.AddScoped<MessengerReadonlyContext>(_ => new MessengerReadonlyContext(connectionString));
+        services.AddTransient<MessengerReadonlyContext>(_ => new MessengerReadonlyContext(connectionString));
 
         services.AddDbContext<MessengerContext>(options =>
         {

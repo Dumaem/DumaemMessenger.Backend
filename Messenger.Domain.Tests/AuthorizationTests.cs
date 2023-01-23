@@ -14,6 +14,7 @@ public class AuthorizationTests
     private readonly Mock<IRefreshTokenRepository> _refreshTokenRepositoryMock;
     private readonly Mock<JwtSettings> _jwtSettingsMock;
     private readonly Mock<TokenValidationParameters> _tokenValidationParametersMock;
+    private readonly Mock<IEncryptionService> _encriptionService;
 
     private readonly IAuthorizationService _authorizationService;
 
@@ -23,9 +24,10 @@ public class AuthorizationTests
         _refreshTokenRepositoryMock = new Mock<IRefreshTokenRepository>();
         _jwtSettingsMock = new Mock<JwtSettings>();
         _tokenValidationParametersMock = new Mock<TokenValidationParameters>();
+        _encriptionService = new Mock<IEncryptionService>();
 
         _authorizationService = new AuthorizationService(_userServiceMock.Object, _jwtSettingsMock.Object,
-            _tokenValidationParametersMock.Object, _refreshTokenRepositoryMock.Object);
+            _tokenValidationParametersMock.Object, _refreshTokenRepositoryMock.Object, _encriptionService.Object);
     }
 
     [Fact]
