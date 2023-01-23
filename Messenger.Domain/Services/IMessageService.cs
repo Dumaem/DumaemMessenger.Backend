@@ -8,7 +8,7 @@ namespace Messenger.Domain.Services
         Task DeleteMessageAsync(long messageId, int? userId = null);
         Task ReadMessageAsync(long messageId, int userId);
         Task ReplyMessageAsync(long repliedMessageId, int repliedMessageChatId,
-            long newMessageId, int newMessageSenderId, byte[] content, int messageTypeId);
+            int newMessageSenderId, byte[] content, int messageTypeId);
         Task ForwardMessageAsync(long forwardedMessageId, byte[] content, int messageTypeId, int chatId, int userId);
         Task EditMessageAsync(long messageId, byte[] content, int messageTypeId);
     }

@@ -18,5 +18,5 @@ public class Message
 
     public long? ForwardedMessageId { get; set; }
 
-    public MessageContent? Content { get; set; }
+    public MessageContent Content { get; set; } = null!;
 }

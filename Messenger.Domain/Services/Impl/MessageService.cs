@@ -43,7 +43,7 @@ namespace Messenger.Domain.Services.Impl
             if (userId is null)
             {
                 message.IsDeleted = true;
-                await _messageRepository.EditMessageByIdAsync(messageId, message);
+                await _messageRepository.DeleteMessageForAllUsers(messageId);
                 return;
             }
             // Use the repository to delete the message for one user
@@ -57,7 +57,7 @@ namespace Messenger.Domain.Services.Impl
         }
 
         public async Task ReplyMessageAsync(long repliedMessageId, int repliedMessageChatId,
-            long newMessageId, int newMessageSenderId, byte[] content, int messageTypeId)
+            int newMessageSenderId, byte[] content, int messageTypeId)
         {
             // Use the repository to send a reply message
             var reply = new Message

@@ -62,11 +62,8 @@ namespace Messenger.Database.Repositories
 
             message.IsEdited = true;
 
-            if (editedMessage.Content is not null)
-            {
-                messageContent.Content = editedMessage.Content.Content;
-                messageContent.TypeId = editedMessage.Content.TypeId;
-            }
+            messageContent.Content = editedMessage.Content.Content;
+            messageContent.TypeId = editedMessage.Content.TypeId;
 
             _context.Messages.Update(message);
             _context.MessageContents.Update(messageContent);
@@ -83,7 +80,7 @@ namespace Messenger.Database.Repositories
                               messageContent.Message = message;
                               return messageContent;
                           },
-                          splitOn: "m_id", param: new {id})).SingleOrDefault() ??
+                          splitOn: "m_id", param: new { id })).SingleOrDefault() ??
                       throw new ValidationException($"No message with id {id} found");
 
             return new Message
@@ -97,7 +94,7 @@ namespace Messenger.Database.Repositories
                 ForwardedMessageId = res.Message.ForwardedMessageId,
                 RepliedMessageId = res.Message.RepliedMessageId,
                 Content = new MessageContent
-                    {Content = res.Content, MessageId = res.MessageId, TypeId = res.TypeId}
+                { Content = res.Content, MessageId = res.MessageId, TypeId = res.TypeId }
             };
         }
 
@@ -119,7 +116,7 @@ namespace Messenger.Database.Repositories
         public async Task DeleteMessageForAllUsers(long deletedMessageId)
         {
             await _readonlyContext.Connection.QuerySingleOrDefaultAsync<MessageDb>(
-                MessageRepositoryQueries.DeleteMessageForAllUsers, new {id = deletedMessageId});
+                MessageRepositoryQueries.DeleteMessageForAllUsers, new { id = deletedMessageId });
         }
 
         public async Task CreateReadMessage(long messageId, int userId)
