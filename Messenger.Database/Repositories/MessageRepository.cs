@@ -23,6 +23,8 @@ namespace Messenger.Database.Repositories
 
         public async Task<long> CreateMessageAsync(Message message)
         {
+            var messageContent = message.Content ?? throw new ValidationException("No message content");
+
             var dbMessage = new MessageDb
             {
                 Id = message.Id,
@@ -54,13 +56,17 @@ namespace Messenger.Database.Repositories
         {
             var message = _context.Messages.SingleOrDefault(m => m.Id == id) ??
                           throw new ValidationException("No message found");
+
             var messageContent = _context.MessageContents.SingleOrDefault(mc => mc.MessageId == message.Id) ??
                                  throw new DataException($"No message content for message {id}. Check database issues");
 
             message.IsEdited = true;
 
-            messageContent.Content = editedMessage.Content.Content;
-            messageContent.TypeId = editedMessage.Content.TypeId;
+            if (editedMessage.Content is not null)
+            {
+                messageContent.Content = editedMessage.Content.Content;
+                messageContent.TypeId = editedMessage.Content.TypeId;
+            }
 
             _context.Messages.Update(message);
             _context.MessageContents.Update(messageContent);
