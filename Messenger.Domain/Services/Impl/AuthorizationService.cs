@@ -73,10 +73,12 @@ public class AuthorizationService : IAuthorizationService
 
         var storedRefreshToken = await _refreshTokenRepository.GetTokenAsync(refreshToken);
 
-        if (storedRefreshToken is null || storedRefreshToken.ExpiryDate < DateTime.UtcNow ||
-            storedRefreshToken.JwtId != jti)
+        if (storedRefreshToken is null || storedRefreshToken.JwtId != jti)
             return new AuthenticationResult {Success = false, Message = RefreshTokenErrorMessages.InvalidToken};
 
+        if (storedRefreshToken.ExpiryDate < DateTime.UtcNow)
+            return new AuthenticationResult {Success = false, Message = RefreshTokenErrorMessages.ExpiredToken};
+        
         if (storedRefreshToken.IsRevoked || storedRefreshToken.IsUsed)
             return new AuthenticationResult {Success = false, Message = RefreshTokenErrorMessages.UsedToken};
 
@@ -176,7 +178,7 @@ public class AuthorizationService : IAuthorizationService
         var tokenForRevoke = await _refreshTokenRepository.GetTokenByUserAndDeviceIdAsync(userId, deviceId);
         if (tokenForRevoke is null)
         {
-            return new AuthenticationResult {Success = false, Message = RefreshTokenErrorMessages.InvalidToken};
+            return new AuthenticationResult {Success = true};
         }
 
         if (tokenForRevoke.IsUsed || tokenForRevoke.IsRevoked)
