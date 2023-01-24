@@ -55,13 +55,13 @@ namespace Messenger.Domain.Tests
         [Fact]
         public async Task DeleteMessageForAllUsersAsync_SuccessfullDeleting_ShouldReturnSuccessfulResult()
         {
-            _messageRepositoryMock.Setup(x => x.DeleteMessageForAllUsers(It.IsAny<long>())).
-                Returns(Task.CompletedTask);
+            _messageRepositoryMock.Setup(
+                x => x.GetMessageByIdAsync(It.IsAny<long>())).ReturnsAsync(new Message());
 
             Func<Task> res = async () => await _messageService.DeleteMessageAsync(It.IsAny<long>(), (int?)null);
 
             // Only exception that this test falls in is NullReference one. This is becuase of userId nullability
-            await res.Should().ThrowAsync<NullReferenceException>();
+            await res.Should().NotThrowAsync();
         }
 
         [Fact]
