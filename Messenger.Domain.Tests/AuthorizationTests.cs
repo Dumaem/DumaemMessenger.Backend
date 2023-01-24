@@ -3,7 +3,6 @@ using Messenger.Domain.Repositories;
 using Messenger.Domain.Services;
 using Messenger.Domain.Services.Impl;
 using Messenger.Domain.Settings;
-using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Messenger.Domain.Tests;

@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-
-namespace Messenger.Domain.Services;
+﻿namespace Messenger.Domain.Services;
 
 public interface IAuthorizationService
 {

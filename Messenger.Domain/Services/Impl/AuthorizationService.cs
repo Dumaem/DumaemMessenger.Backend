@@ -6,9 +6,6 @@ using Messenger.Domain.ErrorMessages;
 using Messenger.Domain.Models;
 using Messenger.Domain.Repositories;
 using Messenger.Domain.Settings;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Headers;
-using Microsoft.AspNetCore.Localization;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Messenger.Domain.Services.Impl;
