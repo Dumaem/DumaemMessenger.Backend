@@ -1,4 +1,4 @@
-﻿using Messenger.Domain;
+﻿using Messenger.Domain.Results;
 using Messenger.WebAPI.Credentials;
 using Messenger.WebAPI.Responses;
 using Microsoft.AspNetCore.Mvc;
