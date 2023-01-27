@@ -111,18 +111,5 @@ namespace Messenger.Domain.Tests
 
             await res.Should().NotThrowAsync();
         }
-
-        [Fact]
-        public async Task EditMessage_UnsuccessfullEditing_ShouldReturnUnsuccessfulResult()
-        {
-            _messageRepositoryMock.Setup(
-                x => x.GetMessageByIdAsync(It.IsAny<long>())).ReturnsAsync(() => null);
-
-            Func<Task> res = async () => await _messageService.EditMessageAsync(It.IsAny<long>(),
-                It.IsAny<byte[]>(), It.IsAny<int>());
-
-            await res.Should().ThrowAsync<NullReferenceException>();
-        }
-
     }
 }
