@@ -19,23 +19,29 @@ public class AuthorizationTests
     private readonly Mock<IUserService> _userServiceMock;
     private readonly Mock<IRefreshTokenRepository> _refreshTokenRepositoryMock;
     private readonly Mock<JwtSettings> _jwtSettingsMock;
-    private readonly Mock<TokenValidationParameters> _tokenValidationParametersMock;
     private readonly Mock<IEncryptionService> _encryptionService;
     private readonly IAuthorizationService _authorizationService;
     private const string DefaultDeviceId = "defaultDeviceId";
-    private readonly Mock<TokenValidationParameters> _tokenValidationParameters;
 
     public AuthorizationTests()
     {
         _userServiceMock = new Mock<IUserService>();
         _refreshTokenRepositoryMock = new Mock<IRefreshTokenRepository>();
         _jwtSettingsMock = new Mock<JwtSettings>();
-        _tokenValidationParametersMock = new Mock<TokenValidationParameters>();
         _encryptionService = new Mock<IEncryptionService>();
-        _tokenValidationParameters = new Mock<TokenValidationParameters>();
+        var tokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(MockExtensions.Key)),
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            RequireExpirationTime = false,
+            ClockSkew = TimeSpan.Zero
+        };
 
         _authorizationService = new AuthorizationService(_userServiceMock.Object, _jwtSettingsMock.Object,
-            _tokenValidationParametersMock.Object, _refreshTokenRepositoryMock.Object, _encryptionService.Object);
+            tokenValidationParameters, _refreshTokenRepositoryMock.Object, _encryptionService.Object);
     }
 
     [Fact]
@@ -223,7 +229,6 @@ public class AuthorizationTests
     public async Task RefreshAsync_InvalidRefreshToken_ShouldReturnUnsuccessfulResult()
     {
         _jwtSettingsMock.SetupJwtSettingsMock();
-        _tokenValidationParameters.SetupTokenValidationParameters();
         var testUser = new User
         {
             Email = "test@gmail.com",
@@ -262,7 +267,6 @@ public class AuthorizationTests
     public async Task RefreshAsync_NotContainsJtiToken_ShouldReturnUnsuccessfulResult()
     {
         _jwtSettingsMock.SetupJwtSettingsMock();
-        _tokenValidationParametersMock.SetupTokenValidationParameters();
         var testUser = new User
         {
             Email = "test@gmail.com",
@@ -304,7 +308,6 @@ public class AuthorizationTests
     public async Task RefreshAsync_ExpiredToken_ShouldReturnUnsuccessfulResult()
     {
         _jwtSettingsMock.SetupJwtSettingsMock();
-        _tokenValidationParametersMock.SetupTokenValidationParameters();
         var testUser = new User
         {
             Email = "test@gmail.com",

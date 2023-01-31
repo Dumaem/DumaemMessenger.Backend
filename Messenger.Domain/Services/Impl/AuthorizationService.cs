@@ -110,7 +110,7 @@ public class AuthorizationService : IAuthorizationService
     private bool IsJwtHasValidSecurityAlgorithm(SecurityToken validatedToken)
     {
         return validatedToken is JwtSecurityToken token &&
-               token.Header.Alg.Equals(SecurityAlgorithms.HmacSha256Signature,
+               token.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
                    StringComparison.InvariantCultureIgnoreCase);
     }
 

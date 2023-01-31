@@ -24,7 +24,9 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         var refreshTokenDb = new RefreshTokenDb
         {
             JwtId = refreshToken.JwtId, CreationDate = refreshToken.CreationDate, UserId = refreshToken.UserId,
-            ExpiryDate = refreshToken.ExpiryDate
+            ExpiryDate = refreshToken.ExpiryDate,
+            DeviceId = refreshToken.DeviceId,
+            Token = refreshToken.Token
         };
 
         _context.RefreshTokens.Add(refreshTokenDb);
@@ -46,7 +48,8 @@ public class RefreshTokenRepository : IRefreshTokenRepository
                 IsRevoked = res.IsRevoked,
                 CreationDate = res.CreationDate,
                 ExpiryDate = res.ExpiryDate,
-                UserId = res.UserId
+                UserId = res.UserId,
+                DeviceId = res.DeviceId
             };
     }
 
@@ -65,7 +68,7 @@ public class RefreshTokenRepository : IRefreshTokenRepository
     public async Task<RefreshToken?> GetTokenByUserAndDeviceIdAsync(int userId, string deviceId)
     {
        var res =  await _readonlyContext.Connection
-            .QuerySingleOrDefaultAsync(RefreshTokenRepositoryQueries.GetTokenByUserAndDeviceIdAsync,
+            .QuerySingleOrDefaultAsync<RefreshTokenDb>(RefreshTokenRepositoryQueries.GetTokenByUserAndDeviceIdAsync,
                 new {userId, deviceId});
        
        return res is null
@@ -78,7 +81,8 @@ public class RefreshTokenRepository : IRefreshTokenRepository
                IsRevoked = res.IsRevoked,
                CreationDate = res.CreationDate,
                ExpiryDate = res.ExpiryDate,
-               UserId = res.UserId
+               UserId = res.UserId,
+               DeviceId = res.DeviceId
            };
     }
 }
