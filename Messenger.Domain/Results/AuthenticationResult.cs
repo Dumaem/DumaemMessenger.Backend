@@ -4,5 +4,5 @@ namespace Messenger.Domain.Results;
 
 public class AuthenticationResult : BaseResult
 {
-    public JwtToken? Token { get; set; }
+    public JwtToken? Token { get; init; }
 }
