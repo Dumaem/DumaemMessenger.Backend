@@ -205,6 +205,11 @@ public class MessengerContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_user_chat_user_id_user_id");
+
+            entity.HasOne(d => d.Chat).WithMany(p => p.Users)
+                .HasForeignKey(d => d.ChatId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_user_chat_chat_id_chat_id");
         });
     }
 }
