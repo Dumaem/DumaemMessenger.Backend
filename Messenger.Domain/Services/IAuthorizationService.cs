@@ -1,4 +1,6 @@
-﻿namespace Messenger.Domain.Services;
+﻿using Messenger.Domain.Results;
+
+namespace Messenger.Domain.Services;
 
 public interface IAuthorizationService
 {

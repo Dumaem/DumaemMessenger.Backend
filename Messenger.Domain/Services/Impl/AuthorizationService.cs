@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using Messenger.Domain.Models;
 using Messenger.Domain.Repositories;
+using Messenger.Domain.Results;
 using Messenger.Domain.Settings;
 using Microsoft.IdentityModel.Tokens;
 
@@ -75,7 +76,7 @@ public class AuthorizationService : IAuthorizationService
         if (storedRefreshToken.IsRevoked || storedRefreshToken.IsUsed)
             return new AuthenticationResult {Success = false, Message = "Token is already used"};
 
-        await _refreshTokenRepository.UseTokenAsync();
+        await _refreshTokenRepository.UseTokenAsync(storedRefreshToken.Id);
 
         int.TryParse(validatedToken.Claims.Single(x => x.Type == "id").Value, out var userId);
         var user = await _userService.GetUserByIdAsync(userId);
