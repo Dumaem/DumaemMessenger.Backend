@@ -3,4 +3,5 @@
 public static class ServerErrorMessages
 {
     public const string InternalServerError = "Ошибка сервера. Обратитесь в поддержку за помощью.";
+    public const string TokenDoesNotBelongToUser = "Токен авторизации содержит несуществующую почту";
 }

@@ -2,7 +2,7 @@ using Messenger.Database;
 using Messenger.Domain;
 using Messenger.Migrator;
 using Messenger.WebAPI;
-using Messenger.WebAPI.Hubs;
+using Messenger.WebAPI.Chat;
 using Messenger.WebAPI.Middlewares;
 using Microsoft.OpenApi.Models;
 
