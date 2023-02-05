@@ -60,10 +60,8 @@ public class AuthorizationService : IAuthorizationService
             return new AuthenticationResult {Success = false, Message = "User has wrong password"};
         
         var deviceId = await GenerateDeviceId(userAgent);
-        var res = await RevokeTokenIfExists(existingUser.Id, deviceId);
-        if (!res.Success)
-            return res;
-        
+        await RevokeActualTokenIfExists(existingUser.Id, deviceId);
+
         return await GenerateTokenForUserAsync(existingUser, deviceId);
     }
 
@@ -83,21 +81,21 @@ public class AuthorizationService : IAuthorizationService
 
         if (storedRefreshToken.ExpiryDate < DateTime.UtcNow)
             return new AuthenticationResult {Success = false, Message = RefreshTokenErrorMessages.ExpiredToken};
-        
-        if (storedRefreshToken.IsRevoked || storedRefreshToken.IsUsed)
-            return new AuthenticationResult {Success = false, Message = RefreshTokenErrorMessages.UsedToken};
+
         
         int.TryParse(validatedToken.Claims.Single(x => x.Type == "id").Value, out var userId);
         var user = await _userService.GetUserByIdAsync(userId);
         
         var deviceId = await GenerateDeviceId(userAgent);
-        var res = await RevokeTokenIfExists(user!.Id, deviceId);
-        if (!res.Success)
-            return res;
-        
+        if (storedRefreshToken.IsRevoked || storedRefreshToken.IsUsed)
+        {
+            await RevokeActualTokenIfExists(user!.Id, deviceId);
+            return new AuthenticationResult {Success = false, Message = RefreshTokenErrorMessages.UsedToken};
+        }
+
         await _refreshTokenRepository.UseTokenAsync(storedRefreshToken.Id);
 
-        return await GenerateTokenForUserAsync(user!, userAgent);
+        return await GenerateTokenForUserAsync(user!, deviceId);
     }
 
     private ClaimsPrincipal? GetPrincipalFromToken(string token)
@@ -126,10 +124,6 @@ public class AuthorizationService : IAuthorizationService
 
     private async Task<AuthenticationResult> GenerateTokenForUserAsync(User user, string deviceId)
     {
-        var res = await RevokeTokenIfExists(user.Id, deviceId);
-        if (!res.Success)
-            return res;
-
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_jwtSettings.Key);
         var tokenDescriptor = new SecurityTokenDescriptor
@@ -182,21 +176,8 @@ public class AuthorizationService : IAuthorizationService
         return deviceId;
     }
 
-    private async Task<AuthenticationResult> RevokeTokenIfExists(int userId, string deviceId)
+    private async Task RevokeActualTokenIfExists(int userId, string deviceId)
     {
-        var tokenForRevoke = await _refreshTokenRepository.GetTokenByUserAndDeviceIdAsync(userId, deviceId);
-        if (tokenForRevoke is null)
-        {
-            return new AuthenticationResult {Success = true};
-        }
-
-        if (tokenForRevoke.IsUsed || tokenForRevoke.IsRevoked)
-            return new AuthenticationResult {Success = false, Message = RefreshTokenErrorMessages.UsedToken};
-
-        await _refreshTokenRepository.RevokeTokenAsync(tokenForRevoke.Id);
-        return new AuthenticationResult
-        {
-            Success = true
-        };
+        await _refreshTokenRepository.RevokeTokenIfExistsAsync(userId, deviceId);
     }
 }

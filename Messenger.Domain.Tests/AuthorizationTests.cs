@@ -201,7 +201,7 @@ public class AuthorizationTests
         _userServiceMock.Setup(x => x.CheckUserPasswordAsync(It.IsAny<int>(),
             It.IsAny<string>())).ReturnsAsync(true);
         _jwtSettingsMock.SetupJwtSettingsMock();
-        _refreshTokenRepositoryMock.Setup(x => x.RevokeTokenAsync(It.IsAny<int>()))
+        _refreshTokenRepositoryMock.Setup(x => x.RevokeTokenIfExistsAsync(It.IsAny<int>()))
             .Returns(Task.CompletedTask);
         var res = await _authorizationService.AuthorizeAsync(It.IsAny<string>(),
             It.IsAny<string>(), It.IsAny<string>());

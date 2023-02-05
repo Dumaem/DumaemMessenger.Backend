@@ -59,16 +59,21 @@ public class RefreshTokenRepository : IRefreshTokenRepository
             .ExecuteAsync(RefreshTokenRepositoryQueries.UpdateRefreshTokenUse, new {id = tokenId});
     }
     
-    public async Task RevokeTokenAsync(int tokenId)
+    public async Task RevokeTokenIfExistsAsync(int userId, string deviceId)
     {
+        var res =  await _readonlyContext.Connection
+            .QuerySingleOrDefaultAsync<RefreshTokenDb>(RefreshTokenRepositoryQueries.GetActualTokenByUserAndDeviceId,
+                new {userId, deviceId});
+        if (res is null)
+            return;
         await  _readonlyContext.Connection
-            .ExecuteAsync(RefreshTokenRepositoryQueries.UpdateRefreshTokenRevoke, new {id = tokenId});
+            .ExecuteAsync(RefreshTokenRepositoryQueries.UpdateRefreshTokenRevoke, new {id = res.Id});
     }
 
     public async Task<RefreshToken?> GetTokenByUserAndDeviceIdAsync(int userId, string deviceId)
     {
        var res =  await _readonlyContext.Connection
-            .QuerySingleOrDefaultAsync<RefreshTokenDb>(RefreshTokenRepositoryQueries.GetTokenByUserAndDeviceId,
+            .QuerySingleOrDefaultAsync<RefreshTokenDb>(RefreshTokenRepositoryQueries.GetActualTokenByUserAndDeviceId,
                 new {userId, deviceId});
        
        return res is null

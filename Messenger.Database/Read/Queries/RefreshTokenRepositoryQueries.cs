@@ -4,7 +4,7 @@ internal static class RefreshTokenRepositoryQueries
 {
     internal const string GetRefreshToken = "SELECT * FROM public.refresh_token WHERE token = @token";
     
-    internal const string GetTokenByUserAndDeviceId = 
+    internal const string GetActualTokenByUserAndDeviceId = 
         "SELECT * FROM public.refresh_token WHERE user_id = @userId and device_id = @deviceId " +
         "and not is_revoked and not is_used";
     
