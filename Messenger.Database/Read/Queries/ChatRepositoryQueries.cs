@@ -7,7 +7,9 @@ internal static class ChatRepositoryQueries
                                                     FROM public.chat c 
                                                         JOIN public.user_chat uc 
                                                             ON uc.chat_id = c.id 
-                                                    WHERE uc.email = @email";
+                                                        JOIN public.user u
+                                                            ON u.id = uc.user_id
+                                                    WHERE u.email = @email";
 
     internal const string GetChatParticipants = $@"SELECT u.id,
                                                           u.username,
