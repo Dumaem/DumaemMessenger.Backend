@@ -1,6 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 using Messenger.Domain.Models;
 using Messenger.Domain.Repositories;
@@ -8,9 +7,6 @@ using Messenger.Domain.Services;
 using Messenger.Domain.Services.Impl;
 using Messenger.Domain.Settings;
 using Microsoft.IdentityModel.Tokens;
-using DeviceDetectorNET;
-using DeviceDetectorNET.Results;
-using DeviceDetectorNET.Results.Client;
 using Messenger.Domain.ErrorMessages;
 
 namespace Messenger.Domain.Tests;
