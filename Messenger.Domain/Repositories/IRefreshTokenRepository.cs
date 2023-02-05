@@ -12,6 +12,6 @@ public interface IRefreshTokenRepository
     /// </summary>
     Task UseTokenAsync(int tokenId);
 
-    Task RevokeTokenAsync(string refreshToken);
+    Task RevokeTokenAsync(int tokenId);
     Task<RefreshToken?> GetTokenByUserAndDeviceIdAsync(int userId, string deviceId);
 }

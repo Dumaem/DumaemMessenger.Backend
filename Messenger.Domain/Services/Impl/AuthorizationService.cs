@@ -58,8 +58,13 @@ public class AuthorizationService : IAuthorizationService
 
         if (!isPasswordValid)
             return new AuthenticationResult {Success = false, Message = "User has wrong password"};
-
-        return await GenerateTokenForUserAsync(existingUser, userAgent);
+        
+        var deviceId = await GenerateDeviceId(userAgent);
+        var res = await RevokeTokenIfExists(existingUser.Id, deviceId);
+        if (!res.Success)
+            return res;
+        
+        return await GenerateTokenForUserAsync(existingUser, deviceId);
     }
 
     public async Task<AuthenticationResult> RefreshAsync(string token, string refreshToken, string userAgent)
@@ -81,11 +86,16 @@ public class AuthorizationService : IAuthorizationService
         
         if (storedRefreshToken.IsRevoked || storedRefreshToken.IsUsed)
             return new AuthenticationResult {Success = false, Message = RefreshTokenErrorMessages.UsedToken};
-
-        await _refreshTokenRepository.UseTokenAsync(storedRefreshToken.Id);
-
+        
         int.TryParse(validatedToken.Claims.Single(x => x.Type == "id").Value, out var userId);
         var user = await _userService.GetUserByIdAsync(userId);
+        
+        var deviceId = await GenerateDeviceId(userAgent);
+        var res = await RevokeTokenIfExists(user!.Id, deviceId);
+        if (!res.Success)
+            return res;
+        
+        await _refreshTokenRepository.UseTokenAsync(storedRefreshToken.Id);
 
         return await GenerateTokenForUserAsync(user!, userAgent);
     }
@@ -114,9 +124,8 @@ public class AuthorizationService : IAuthorizationService
                    StringComparison.InvariantCultureIgnoreCase);
     }
 
-    private async Task<AuthenticationResult> GenerateTokenForUserAsync(User user, string userAgent)
+    private async Task<AuthenticationResult> GenerateTokenForUserAsync(User user, string deviceId)
     {
-        var deviceId = await GenerateDeviceId(userAgent);
         var res = await RevokeTokenIfExists(user.Id, deviceId);
         if (!res.Success)
             return res;
@@ -184,7 +193,7 @@ public class AuthorizationService : IAuthorizationService
         if (tokenForRevoke.IsUsed || tokenForRevoke.IsRevoked)
             return new AuthenticationResult {Success = false, Message = RefreshTokenErrorMessages.UsedToken};
 
-        await _refreshTokenRepository.RevokeTokenAsync(tokenForRevoke.Token);
+        await _refreshTokenRepository.RevokeTokenAsync(tokenForRevoke.Id);
         return new AuthenticationResult
         {
             Success = true
