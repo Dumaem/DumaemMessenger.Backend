@@ -61,7 +61,7 @@ public class AuthorizationTests
         _encryptionService.Setup(x => x.EncryptStringAsync(It.IsAny<string>()))
             .ReturnsAsync(DefaultDeviceId);
         _userServiceMock.Setup(x => x.GetUserByEmailAsync(It.IsAny<string>()))
-            .ReturnsAsync((User?) null);
+            .ReturnsAsync((User?)null);
         _userServiceMock.Setup(x => x.CreateUserAsync(It.IsAny<User>(), It.IsAny<string>()))
             .ReturnsAsync(It.IsAny<int>());
         _jwtSettingsMock.SetupJwtSettingsMock();
@@ -75,17 +75,17 @@ public class AuthorizationTests
         res.Token!.RefreshToken.Should().NotBeNull();
         res.Token.AccessToken.Should().NotBeNull();
     }
-    
-    
+
+
     [Fact]
     public async Task AuthorizeAsync_NotExistUser_ShouldReturnUnsuccessfulResult()
     {
         _userServiceMock.Setup(x => x.GetUserByEmailAsync(It.IsAny<string>()))
-            .ReturnsAsync((User?) null);
-        
+            .ReturnsAsync((User?)null);
+
         var res = await _authorizationService.AuthorizeAsync(It.IsAny<string>(),
             It.IsAny<string>(), It.IsAny<string>());
-        
+
         res.Should().BeOfType<AuthenticationResult>();
         res.Success.Should().BeFalse();
         res.Message.Should().Be("User does not exist");
@@ -111,15 +111,15 @@ public class AuthorizationTests
     {
         _encryptionService.Setup(x => x.EncryptStringAsync(It.IsAny<string>()))
             .ReturnsAsync(DefaultDeviceId);
-        _refreshTokenRepositoryMock.Setup(x => 
-            x.GetTokenByUserAndDeviceIdAsync(It.IsAny<int>(), DefaultDeviceId))
-                .ReturnsAsync(new RefreshToken
-                                {
-                                    UserId = 1,
-                                    IsUsed = false,
-                                    Id = 1,
-                                    IsRevoked = false
-                                });
+        _refreshTokenRepositoryMock.Setup(x =>
+                x.GetTokenByUserAndDeviceIdAsync(It.IsAny<int>(), DefaultDeviceId))
+            .ReturnsAsync(new RefreshToken
+            {
+                UserId = 1,
+                IsUsed = false,
+                Id = 1,
+                IsRevoked = false
+            });
         _userServiceMock.Setup(x => x.GetUserByEmailAsync(It.IsAny<string>())).ReturnsAsync(new User
         {
             Name = It.IsAny<string>(),
@@ -132,10 +132,10 @@ public class AuthorizationTests
             It.IsAny<string>())).ReturnsAsync(true);
         _jwtSettingsMock.SetupJwtSettingsMock();
         _refreshTokenRepositoryMock.Setup(x => x.RevokeTokenIfExistsAsync(It.IsAny<int>(),
-                It.IsAny<string>())).Returns(Task.CompletedTask);
+            It.IsAny<string>())).Returns(Task.CompletedTask);
         var res = await _authorizationService.AuthorizeAsync(It.IsAny<string>(),
             It.IsAny<string>(), It.IsAny<string>());
-    
+
         res.Should().BeOfType<AuthenticationResult>();
         res.Success.Should().BeTrue();
         res.Message.Should().BeNull();
@@ -184,7 +184,7 @@ public class AuthorizationTests
 
         _refreshTokenRepositoryMock.Setup(x => x.GetTokenAsync(It.IsAny<string>()))
             .ReturnsAsync((RefreshToken?)null);
-        
+
         var res = await _authorizationService.RefreshAsync(tokenHandler.WriteToken(accessToken),
             It.IsAny<string>(), It.IsAny<string>());
 
@@ -192,7 +192,7 @@ public class AuthorizationTests
         res.Success.Should().BeFalse();
         res.Message.Should().Be(RefreshTokenErrorMessages.InvalidToken);
     }
-    
+
     [Fact]
     public async Task RefreshAsync_NotContainsJtiToken_ShouldReturnUnsuccessfulResult()
     {
@@ -226,7 +226,7 @@ public class AuthorizationTests
                 Id = 1,
                 JwtId = "232323232"
             });
-        
+
         var res = await _authorizationService.RefreshAsync(tokenHandler.WriteToken(accessToken),
             It.IsAny<string>(), It.IsAny<string>());
 
@@ -234,6 +234,38 @@ public class AuthorizationTests
         res.Success.Should().BeFalse();
         res.Message.Should().Be(RefreshTokenErrorMessages.InvalidToken);
     }
+
+    [Fact]
+    public async Task RefreshAsync_WrongSecurityAlgorithm_ShouldReturnUnsuccessfulResult()
+    {
+        _jwtSettingsMock.SetupJwtSettingsMock();
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.ASCII.GetBytes(_jwtSettingsMock.Object.Key);
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, "test@gmail.com"),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, "test@gmail.com"),
+                new Claim("id", 1.ToString()),
+                new Claim("deviceId", DefaultDeviceId)
+            }),
+            Expires = DateTime.UtcNow.Add(_jwtSettingsMock.Object.AccessTokenLifetime),
+            SigningCredentials =
+                new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha512)
+        };
+        var accessToken = tokenHandler.CreateToken(tokenDescriptor);
+
+        var res = await _authorizationService.RefreshAsync(tokenHandler.WriteToken(accessToken),
+            It.IsAny<string>(), It.IsAny<string>());
+
+        res.Should().BeOfType<AuthenticationResult>();
+        res.Success.Should().BeFalse();
+        res.Message.Should().Be(RefreshTokenErrorMessages.InvalidToken);
+    }
+
     [Fact]
     public async Task RefreshAsync_ExpiredToken_ShouldReturnUnsuccessfulResult()
     {
@@ -278,7 +310,7 @@ public class AuthorizationTests
         res.Success.Should().BeFalse();
         res.Message.Should().Be(RefreshTokenErrorMessages.ExpiredToken);
     }
-    
+
     [Fact]
     public async Task RefreshAsync_UsedToken_ShouldReturnUnsuccessfulResult()
     {
@@ -329,7 +361,7 @@ public class AuthorizationTests
         res.Success.Should().BeFalse();
         res.Message.Should().Be(RefreshTokenErrorMessages.UsedToken);
     }
-    
+
     [Fact]
     public async Task RefreshAsync_RevokedToken_ShouldReturnUnsuccessfulResult()
     {
@@ -380,7 +412,7 @@ public class AuthorizationTests
         res.Success.Should().BeFalse();
         res.Message.Should().Be(RefreshTokenErrorMessages.UsedToken);
     }
-    
+
     [Fact]
     public async Task RefreshAsync_SuccessPath_ShouldReturnSuccessfulResult()
     {
@@ -391,7 +423,7 @@ public class AuthorizationTests
         };
         _jwtSettingsMock.SetupJwtSettingsMock();
         _userServiceMock.Setup(x => x.GetUserByIdAsync(It.IsAny<int>())).ReturnsAsync(testUser);
-        
+
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_jwtSettingsMock.Object.Key);
         var tokenDescriptor = new SecurityTokenDescriptor
@@ -408,13 +440,13 @@ public class AuthorizationTests
             SigningCredentials =
                 new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
-        
+
         var accessToken = tokenHandler.CreateToken(tokenDescriptor);
         var token = tokenHandler.WriteToken(accessToken);
 
         var principal = tokenHandler.ValidateToken(token, _tokenValidationParameters, out var validatedToken);
         var jti = principal.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
-        
+
         _refreshTokenRepositoryMock.Setup(x => x.GetTokenAsync(It.IsAny<string>()))
             .ReturnsAsync(new RefreshToken
             {
