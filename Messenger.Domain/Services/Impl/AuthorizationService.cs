@@ -19,7 +19,8 @@ public class AuthorizationService : IAuthorizationService
     private readonly IEncryptionService _encryptionService;
 
     public AuthorizationService(IUserService userService, JwtSettings jwtSettings,
-        TokenValidationParameters tokenValidationParameters, IRefreshTokenRepository refreshTokenRepository, IEncryptionService encryptionService)
+        TokenValidationParameters tokenValidationParameters, IRefreshTokenRepository refreshTokenRepository,
+        IEncryptionService encryptionService)
     {
         _userService = userService;
         _jwtSettings = jwtSettings;
@@ -34,7 +35,7 @@ public class AuthorizationService : IAuthorizationService
         var existingUser = await _userService.GetUserByEmailAsync(email);
 
         if (existingUser is not null)
-            return new AuthenticationResult {Success = false, Message = "User with this email already exists"};
+            return new AuthenticationResult { Success = false, Message = "User with this email already exists" };
 
         var user = new User
         {
@@ -52,13 +53,13 @@ public class AuthorizationService : IAuthorizationService
         var existingUser = await _userService.GetUserByEmailAsync(email);
 
         if (existingUser is null)
-            return new AuthenticationResult {Success = false, Message = "User does not exist"};
+            return new AuthenticationResult { Success = false, Message = "User does not exist" };
 
         var isPasswordValid = await _userService.CheckUserPasswordAsync(existingUser.Id, password);
 
         if (!isPasswordValid)
-            return new AuthenticationResult {Success = false, Message = "User has wrong password"};
-        
+            return new AuthenticationResult { Success = false, Message = "User has wrong password" };
+
         var deviceId = await GenerateDeviceId(userAgent);
         await RevokeActualTokenIfExists(existingUser.Id, deviceId);
 
@@ -70,27 +71,27 @@ public class AuthorizationService : IAuthorizationService
         var validatedToken = GetPrincipalFromToken(token);
 
         if (validatedToken == null)
-            return new AuthenticationResult {Success = false, Message = RefreshTokenErrorMessages.InvalidToken};
+            return new AuthenticationResult { Success = false, Message = RefreshTokenErrorMessages.InvalidToken };
 
         var jti = validatedToken.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
 
         var storedRefreshToken = await _refreshTokenRepository.GetTokenAsync(refreshToken);
 
         if (storedRefreshToken is null || storedRefreshToken.JwtId != jti)
-            return new AuthenticationResult {Success = false, Message = RefreshTokenErrorMessages.InvalidToken};
+            return new AuthenticationResult { Success = false, Message = RefreshTokenErrorMessages.UnrecognizedToken };
 
         if (storedRefreshToken.ExpiryDate < DateTime.UtcNow)
-            return new AuthenticationResult {Success = false, Message = RefreshTokenErrorMessages.ExpiredToken};
+            return new AuthenticationResult { Success = false, Message = RefreshTokenErrorMessages.ExpiredToken };
 
-        
+
         int.TryParse(validatedToken.Claims.Single(x => x.Type == "id").Value, out var userId);
         var user = await _userService.GetUserByIdAsync(userId);
-        
+
         var deviceId = await GenerateDeviceId(userAgent);
         if (storedRefreshToken.IsRevoked || storedRefreshToken.IsUsed)
         {
             await RevokeActualTokenIfExists(user!.Id, deviceId);
-            return new AuthenticationResult {Success = false, Message = RefreshTokenErrorMessages.UsedToken};
+            return new AuthenticationResult { Success = false, Message = RefreshTokenErrorMessages.UsedToken };
         }
 
         await _refreshTokenRepository.UseTokenAsync(storedRefreshToken.Id);

@@ -190,7 +190,7 @@ public class AuthorizationTests
 
         res.Should().BeOfType<AuthenticationResult>();
         res.Success.Should().BeFalse();
-        res.Message.Should().Be(RefreshTokenErrorMessages.InvalidToken);
+        res.Message.Should().Be(RefreshTokenErrorMessages.UnrecognizedToken);
     }
 
     [Fact]
@@ -232,7 +232,7 @@ public class AuthorizationTests
 
         res.Should().BeOfType<AuthenticationResult>();
         res.Success.Should().BeFalse();
-        res.Message.Should().Be(RefreshTokenErrorMessages.InvalidToken);
+        res.Message.Should().Be(RefreshTokenErrorMessages.UnrecognizedToken);
     }
 
     [Fact]
