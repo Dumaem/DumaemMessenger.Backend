@@ -2,11 +2,14 @@
 
 public class ChatException : System.Exception
 {
-    public ChatException(string? message) : base(message)
+    public ChatExceptionType ExceptionType { get; }
+    public ChatException(ChatExceptionType type, string? message) : base(message)
     {
+        ExceptionType = type;
     }
 
-    public ChatException(string? message, System.Exception? innerException) : base(message, innerException)
+    public ChatException(ChatExceptionType type,string? message, System.Exception? innerException) : base(message, innerException)
     {
+        ExceptionType = type;
     }
 }
