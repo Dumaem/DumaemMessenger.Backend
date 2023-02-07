@@ -1,4 +1,4 @@
-﻿namespace Messenger.WebAPI.Credentials;
+﻿namespace Messenger.WebAPI.Shared;
 
 public class MessageContext
 {
