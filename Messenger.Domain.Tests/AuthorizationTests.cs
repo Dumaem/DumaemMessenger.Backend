@@ -42,6 +42,8 @@ public class AuthorizationTests
             _tokenValidationParameters, _refreshTokenRepositoryMock.Object, _encryptionService.Object);
     }
 
+    #region RegisterAsync
+
     [Fact]
     public async Task RegisterAsync_ExistingUser_ShouldReturnUnsuccessfulResult()
     {
@@ -76,6 +78,9 @@ public class AuthorizationTests
         res.Token.AccessToken.Should().NotBeNull();
     }
 
+    #endregion
+
+    #region AuthorizeAsync
 
     [Fact]
     public async Task AuthorizeAsync_NotExistUser_ShouldReturnUnsuccessfulResult()
@@ -144,10 +149,14 @@ public class AuthorizationTests
         res.Token.AccessToken.Should().NotBeNull();
     }
 
+    #endregion
+
+    #region RefreshAsync
+
     [Fact]
     public async Task RefreshAsync_InvalidAccessToken_ShouldReturnUnsuccessfulResult()
     {
-        var res = await _authorizationService.RefreshAsync(null, It.IsAny<string>(),
+        var res = await _authorizationService.RefreshAsync(It.IsAny<string>(), It.IsAny<string>(),
             It.IsAny<string>());
 
         res.Should().BeOfType<AuthenticationResult>();
@@ -294,7 +303,7 @@ public class AuthorizationTests
         var accessToken = tokenHandler.CreateToken(tokenDescriptor);
         var token = tokenHandler.WriteToken(accessToken);
 
-        var principal = tokenHandler.ValidateToken(token, _tokenValidationParameters, out var validatedToken);
+        var principal = tokenHandler.ValidateToken(token, _tokenValidationParameters, out _);
         var jti = principal.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
         _refreshTokenRepositoryMock.Setup(x => x.GetTokenAsync(It.IsAny<string>()))
             .ReturnsAsync(new RefreshToken
@@ -340,7 +349,7 @@ public class AuthorizationTests
         var accessToken = tokenHandler.CreateToken(tokenDescriptor);
         var token = tokenHandler.WriteToken(accessToken);
 
-        var principal = tokenHandler.ValidateToken(token, _tokenValidationParameters, out var validatedToken);
+        var principal = tokenHandler.ValidateToken(token, _tokenValidationParameters, out _);
         var jti = principal.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
         _refreshTokenRepositoryMock.Setup(x => x.GetTokenAsync(It.IsAny<string>()))
             .ReturnsAsync(new RefreshToken
@@ -391,7 +400,7 @@ public class AuthorizationTests
         var accessToken = tokenHandler.CreateToken(tokenDescriptor);
         var token = tokenHandler.WriteToken(accessToken);
 
-        var principal = tokenHandler.ValidateToken(token, _tokenValidationParameters, out var validatedToken);
+        var principal = tokenHandler.ValidateToken(token, _tokenValidationParameters, out _);
         var jti = principal.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
         _refreshTokenRepositoryMock.Setup(x => x.GetTokenAsync(It.IsAny<string>()))
             .ReturnsAsync(new RefreshToken
@@ -444,7 +453,7 @@ public class AuthorizationTests
         var accessToken = tokenHandler.CreateToken(tokenDescriptor);
         var token = tokenHandler.WriteToken(accessToken);
 
-        var principal = tokenHandler.ValidateToken(token, _tokenValidationParameters, out var validatedToken);
+        var principal = tokenHandler.ValidateToken(token, _tokenValidationParameters, out _);
         var jti = principal.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
 
         _refreshTokenRepositoryMock.Setup(x => x.GetTokenAsync(It.IsAny<string>()))
@@ -465,4 +474,6 @@ public class AuthorizationTests
         res.Should().BeOfType<AuthenticationResult>();
         res.Success.Should().BeTrue();
     }
+
+    #endregion
 }
