@@ -177,6 +177,10 @@ public class AuthorizationService : IAuthorizationService
         return deviceId;
     }
 
+    /// <summary>
+    /// Finds actual(not used and not revoked) token by userId and deviceId
+    /// Sets the IsRevoked property to true
+    /// </summary>
     private async Task RevokeActualTokenIfExists(int userId, string deviceId)
     {
         await _refreshTokenRepository.RevokeTokenIfExistsAsync(userId, deviceId);

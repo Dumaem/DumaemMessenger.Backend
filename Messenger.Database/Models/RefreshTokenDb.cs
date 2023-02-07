@@ -7,7 +7,7 @@ public class RefreshTokenDb
     /// <summary>
     /// Server-generated token Id used on client
     /// </summary>
-    public string Token { get; init; }
+    public string Token { get; init; } = null!;
 
     /// <summary>
     /// Access token Id that is related to this refresh token
