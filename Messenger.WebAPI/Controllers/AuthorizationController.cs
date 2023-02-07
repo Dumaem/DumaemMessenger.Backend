@@ -58,6 +58,17 @@ public class AuthorizationController : ControllerBase
         return VerifyAuthenticationResult(result);
     }
 
+    [HttpPost]
+    [Route("verify")]
+    public async Task<IActionResult> Verify([FromBody] UserVerifyCredentials credentials)
+    {
+        var result = await _authorizationService.GenerateUserVerifyToken(credentials.UserEmail);
+        if (!result.Success)
+            return BadRequest(result.Message);
+        return Ok();
+    }
+
+
     /// <summary>
     /// Returns HTTP responses that is appropriate to the authentication result
     /// </summary>
