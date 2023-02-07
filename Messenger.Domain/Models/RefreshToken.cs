@@ -18,4 +18,5 @@ public class RefreshToken
     public DateTime CreationDate { get; set; }
     public DateTime ExpiryDate { get; set; }
     public int UserId { get; set; }
+    public string DeviceId { get; set; } = null!;
 }

@@ -7,7 +7,7 @@ public class RefreshTokenDb
     /// <summary>
     /// Server-generated token Id used on client
     /// </summary>
-    public string Token { get; } = Guid.NewGuid().ToString();
+    public string Token { get; init; } = null!;
 
     /// <summary>
     /// Access token Id that is related to this refresh token
@@ -23,6 +23,8 @@ public class RefreshTokenDb
     public DateTime ExpiryDate { get; set; }
 
     public int UserId { get; set; }
+    
+    public string DeviceId { get; set; } = null!;
 
     public virtual UserDb User { get; set; } = null!;
 }
