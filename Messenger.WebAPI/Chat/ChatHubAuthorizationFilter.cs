@@ -1,4 +1,5 @@
-﻿using Messenger.Domain.Exception;
+﻿using System.Net;
+using Messenger.Domain.Exception;
 using Messenger.WebAPI.Shared;
 using Microsoft.AspNetCore.SignalR;
 
@@ -19,7 +20,7 @@ public class ChatHubAuthorizationFilter : IHubFilter
         catch (ChatException ex)
         {
             await invocationContext.Hub.Clients.Caller.SendAsync("Unathorized",
-                new UnauthorizedAccessContext { Message = ex.Message });
+                new UnauthorizedAccessContext { Message = ex.Message, StatusCode = HttpStatusCode.Unauthorized});
             invocationContext.Context.Abort();
             return ex;
         }
@@ -30,7 +31,7 @@ public class ChatHubAuthorizationFilter : IHubFilter
         }
     }
 
-    private bool IsTokenExpired(HubInvocationContext invocationContext)
+    private static bool IsTokenExpired(HubInvocationContext invocationContext)
     {
         var exp = invocationContext.Context.User!.Claims.First(x => x.Type == "exp").Value;
 

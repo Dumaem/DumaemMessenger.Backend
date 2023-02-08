@@ -1,6 +1,9 @@
-﻿namespace Messenger.WebAPI.Shared;
+﻿using System.Net;
+
+namespace Messenger.WebAPI.Shared;
 
 public class UnauthorizedAccessContext
 {
-    public string Message { get; set; }
+    public required HttpStatusCode StatusCode { get; set; }
+    public string? Message { get; set; }
 }

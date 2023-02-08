@@ -2,6 +2,6 @@
 
 public class MessageContext
 {
-    public int ChatId { get; set; }
-    public object Message { get; set; }
+    public required int ChatId { get; set; }
+    public required object Message { get; set; }
 }
