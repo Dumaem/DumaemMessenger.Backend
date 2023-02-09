@@ -15,19 +15,32 @@ public class UserVerificationRepository : IUserVerificationRepository
         _readonlyContext = readonlyContext;
     }
 
-    public async Task<bool> GetExistingVerifyToken(int userId)
+    public async Task<(string?, DateTime)> GetExistingVerifyToken(int userId)
     {
-        return await _readonlyContext.Connection.QuerySingleOrDefaultAsync<bool>(
+        var res = await _readonlyContext.Connection.QuerySingleOrDefaultAsync<(string?, DateTime)>(
             UserVerificationRepositoryQueries.GetVerifyToken, new {userId});
+        return res;
     }
 
     public async Task CreateVerifyToken(string token, DateTime expiryDate, int userId)
     {
-        await _readonlyContext.Connection.ExecuteAsync(UserVerificationRepositoryQueries.CreateToken ,new
+        await _readonlyContext.Connection.ExecuteAsync(UserVerificationRepositoryQueries.CreateToken, new
         {
             token,
             expiryDate,
             userId
         });
+    }
+
+    public async Task VerifyUser(int userId)
+    {
+        await _readonlyContext.Connection.ExecuteAsync(UserVerificationRepositoryQueries.VerifyUser,
+            new {id = userId});
+    }
+
+    public async Task RevokeExpiredToken(string token)
+    {
+        await _readonlyContext.Connection.ExecuteAsync(UserVerificationRepositoryQueries.RevokeExpiredToken,
+            new {token});
     }
 }

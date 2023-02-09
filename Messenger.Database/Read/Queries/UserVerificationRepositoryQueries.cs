@@ -3,8 +3,12 @@
 internal static class UserVerificationRepositoryQueries
 {
     internal const string GetVerifyToken =
-        "SELECT * FROM public.verification WHERE user_id = @userId and is_actual";
+        "SELECT token, expiry_date FROM public.verification WHERE user_id = @userId and is_actual";
 
     internal const string CreateToken = @"INSERT INTO public.verification (token, expiry_date, user_id) 
             VALUES (@token, @expiryDate, @userId)";
+
+    internal const string VerifyUser = @"UPDATE public.user SET is_verified = true WHERE id = @id";
+    
+    internal const string RevokeExpiredToken = @"UPDATE public.verification SET is_actual = false WHERE token = @token";
 }

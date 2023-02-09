@@ -59,10 +59,20 @@ public class AuthorizationController : ControllerBase
     }
 
     [HttpPost]
+    [Route("create_verify_token")]
+    public async Task<IActionResult> CreateVerifyToken(string userEmail)
+    {
+        var result = await _authorizationService.GenerateUserVerifyToken(userEmail);
+        if (!result.Success)
+            return BadRequest(result.Message);
+        return Ok();
+    }
+    
+    [HttpPost]
     [Route("verify")]
     public async Task<IActionResult> Verify([FromBody] UserVerifyCredentials credentials)
     {
-        var result = await _authorizationService.GenerateUserVerifyToken(credentials.UserEmail);
+        var result = await _authorizationService.VerifyUser(credentials.VerifyToken, credentials.UserEmail);
         if (!result.Success)
             return BadRequest(result.Message);
         return Ok();

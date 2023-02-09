@@ -19,7 +19,7 @@ namespace Messenger.Migrator.Migrations
             Create.Table("verification")
                 .WithColumn("id").AsInt32().PrimaryKey().Identity()
                 .WithColumn("token").AsString(250)
-                .WithColumn("is_actual").AsBoolean().WithDefaultValue(false)
+                .WithColumn("is_actual").AsBoolean().WithDefaultValue(true)  
                 .WithColumn("expiry_date").AsCustom("timestamp with time zone")
                 .WithColumn("user_id").AsInt32().ForeignKey("user", "id");
             Create.UniqueConstraint("uniqToken")

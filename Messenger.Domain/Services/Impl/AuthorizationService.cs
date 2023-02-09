@@ -189,6 +189,9 @@ public class AuthorizationService : IAuthorizationService
         await _refreshTokenRepository.RevokeTokenIfExistsAsync(userId, deviceId);
     }
 
+    /// <summary>
+    /// Creating a new user verify token if it doesn't actually exist
+    /// </summary>
     public async Task<BaseResult> GenerateUserVerifyToken(string email)
     {
         var user = await _userService.GetUserByEmailAsync(email);
@@ -200,13 +203,42 @@ public class AuthorizationService : IAuthorizationService
 
         var existingToken = await _userVerificationRepository.GetExistingVerifyToken(user.Id);
 
-        if (existingToken)
+        if (existingToken.Item1 is not null)
             return new BaseResult {Message = "User already has actual token", Success = false};
 
         var token = Guid.NewGuid().ToString();
         var expiryDate = DateTime.UtcNow.AddHours(1);
         await _userVerificationRepository.CreateVerifyToken(token, expiryDate, user.Id);
 
-        return new BaseResult {Message = "q", Success = true};
+        return new BaseResult
+        {
+            Message = token, 
+            Success = true
+        };
+    }
+
+    public async Task<BaseResult> VerifyUser(string token, string userEmail)
+    {
+        var user = await _userService.GetUserByEmailAsync(userEmail);
+        if (user is null)
+            return new BaseResult {Message = "User does not exist", Success = false};
+
+        if (user.IsVerified)
+            return new BaseResult {Message = "User already verified", Success = false};
+
+        var existingToken = await _userVerificationRepository.GetExistingVerifyToken(user.Id);
+
+        if (existingToken.Item1 is null)
+            return new BaseResult {Message = "User don't have a verification token", Success = false};
+
+        if (existingToken.Item2 <= DateTime.UtcNow)
+        {
+            await  _userVerificationRepository.RevokeExpiredToken(existingToken.Item1);
+            return new BaseResult {Message = "Token is expired", Success = false};   
+        }
+
+        await _userVerificationRepository.VerifyUser(user.Id);
+
+        return new BaseResult {Success = true};
     }
 }
