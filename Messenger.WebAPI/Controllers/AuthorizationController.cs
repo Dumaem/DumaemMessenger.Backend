@@ -69,7 +69,8 @@ public class AuthorizationController : ControllerBase
         return Ok(new AuthResponse
         {
             AccessToken = result.Token!.AccessToken,
-            RefreshToken = result.Token.RefreshToken
+            RefreshToken = result.Token.RefreshToken,
+            UserId = result.UserId
         });
     }
 }

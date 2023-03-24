@@ -162,7 +162,7 @@ public class AuthorizationService : IAuthorizationService
             {
                 AccessToken = tokenHandler.WriteToken(accessToken),
                 RefreshToken = refreshToken.Token
-            }
+            }, UserId = user.Id
         };
     }
 
