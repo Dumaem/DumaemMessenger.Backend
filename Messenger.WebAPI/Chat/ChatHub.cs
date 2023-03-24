@@ -23,7 +23,8 @@ public class ChatHub : Hub
 
     public override async Task OnConnectedAsync()
     {
-        var userChats = await GetChatsForUserAsync();
+        var user = await GetUserAsync();
+        var userChats = await _chatService.GetChatsForUserAsync(user.Email);
         foreach (var chat in userChats)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, chat.Name);
@@ -46,7 +47,7 @@ public class ChatHub : Hub
 
     public async Task SendMessageToChat(MessageContext message)
     {
-        await Clients.Others.SendAsync("ReceiveMessage", message);
+        await Clients.Group(message.ChatId).SendAsync("ReceiveMessage", message);
     }
 
     private async Task<User> GetUserAsync()
