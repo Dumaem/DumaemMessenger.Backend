@@ -24,7 +24,9 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         var refreshTokenDb = new RefreshTokenDb
         {
             JwtId = refreshToken.JwtId, CreationDate = refreshToken.CreationDate, UserId = refreshToken.UserId,
-            ExpiryDate = refreshToken.ExpiryDate
+            ExpiryDate = refreshToken.ExpiryDate,
+            DeviceId = refreshToken.DeviceId,
+            Token = refreshToken.Token
         };
 
         _context.RefreshTokens.Add(refreshTokenDb);
@@ -46,13 +48,46 @@ public class RefreshTokenRepository : IRefreshTokenRepository
                 IsRevoked = res.IsRevoked,
                 CreationDate = res.CreationDate,
                 ExpiryDate = res.ExpiryDate,
-                UserId = res.UserId
+                UserId = res.UserId,
+                DeviceId = res.DeviceId
             };
     }
 
     public async Task UseTokenAsync(int tokenId)
     {
         await  _readonlyContext.Connection
-            .ExecuteAsync(RefreshTokenRepositoryQueries.UpdateRefreshTokenUse, new {Id = tokenId});
+            .ExecuteAsync(RefreshTokenRepositoryQueries.UpdateRefreshTokenUse, new {id = tokenId});
+    }
+    
+    public async Task RevokeTokenIfExistsAsync(int userId, string deviceId)
+    {
+        var res =  await _readonlyContext.Connection
+            .QuerySingleOrDefaultAsync<RefreshTokenDb>(RefreshTokenRepositoryQueries.GetActualTokenByUserAndDeviceId,
+                new {userId, deviceId});
+        if (res is null)
+            return;
+        await  _readonlyContext.Connection
+            .ExecuteAsync(RefreshTokenRepositoryQueries.UpdateRefreshTokenRevoke, new {id = res.Id});
+    }
+
+    public async Task<RefreshToken?> GetTokenByUserAndDeviceIdAsync(int userId, string deviceId)
+    {
+       var res =  await _readonlyContext.Connection
+            .QuerySingleOrDefaultAsync<RefreshTokenDb>(RefreshTokenRepositoryQueries.GetActualTokenByUserAndDeviceId,
+                new {userId, deviceId});
+       
+       return res is null
+           ? null
+           : new RefreshToken
+           {
+               Id = res.Id,
+               JwtId = res.JwtId,
+               IsUsed = res.IsUsed,
+               IsRevoked = res.IsRevoked,
+               CreationDate = res.CreationDate,
+               ExpiryDate = res.ExpiryDate,
+               UserId = res.UserId,
+               DeviceId = res.DeviceId
+           };
     }
 }
