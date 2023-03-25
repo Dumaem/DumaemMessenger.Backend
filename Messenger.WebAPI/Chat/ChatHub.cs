@@ -1,7 +1,10 @@
-﻿using Messenger.Domain.Exception;
+﻿using Messenger.Domain.Enums;
+using Messenger.Domain.Exception;
 using Messenger.Domain.Models;
 using Messenger.Domain.Services;
 using Messenger.WebAPI.Shared;
+using Messenger.WebAPI.Shared.Client;
+using Messenger.WebAPI.Shared.SharedModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
@@ -13,6 +16,7 @@ public class ChatHub : Hub
     private readonly IUserService _userService;
     private readonly IChatService _chatService;
     private readonly ILogger<ChatHub> _logger;
+    private User _user = null!;
 
     public ChatHub(IUserService userService, IChatService chatService, ILogger<ChatHub> logger)
     {
@@ -23,12 +27,13 @@ public class ChatHub : Hub
 
     public override async Task OnConnectedAsync()
     {
-        var user = await GetUserAsync();
-        var userChats = await _chatService.GetChatsForUserAsync(user.Email);
+        _user = await GetUserAsync();
+        var userChats = await _chatService.GetChatsForUserAsync(_user.Email);
         foreach (var chat in userChats)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, chat.Name);
-            await Clients.Group(chat.Name).SendAsync("BecameOnline", "");
+            await Clients.Group(chat.Name).SendAsync(SignalRClientMethods.StatusChanged,
+                new UserStatusContext { Status = UserOnlineStatus.Online, UserId = _user.Id });
         }
 
         await base.OnConnectedAsync();
@@ -36,10 +41,12 @@ public class ChatHub : Hub
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        var userChats = await GetChatsForUserAsync();
-        foreach (var chat in userChats)
+        var chats = await GetChatsForUserAsync();
+        foreach (var chat in chats)
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, chat.Name);
+            await Clients.Group(chat.Name).SendAsync(SignalRClientMethods.StatusChanged,
+                new UserStatusContext { Status = UserOnlineStatus.Offline, UserId = _user.Id });
         }
 
         await base.OnDisconnectedAsync(exception);
@@ -47,7 +54,7 @@ public class ChatHub : Hub
 
     public async Task SendMessageToChat(MessageContext message)
     {
-        await Clients.Group(message.ChatId).SendAsync("ReceiveMessage", message);
+        await Clients.Group(message.ChatId).SendAsync(SignalRClientMethods.ReceiveMessage, message);
     }
 
     private async Task<User> GetUserAsync()
@@ -65,7 +72,6 @@ public class ChatHub : Hub
 
     private async Task<IEnumerable<Domain.Models.Chat>> GetChatsForUserAsync()
     {
-        var user = await GetUserAsync();
-        return await _chatService.GetChatsForUserAsync(user.Email);
+        return await _chatService.GetChatsForUserAsync(_user.Email);
     }
 }

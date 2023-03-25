@@ -1,6 +1,8 @@
 ﻿using System.Net;
 using Messenger.Domain.Exception;
 using Messenger.WebAPI.Shared;
+using Messenger.WebAPI.Shared.Client;
+using Messenger.WebAPI.Shared.SharedModels;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Messenger.WebAPI.Chat;
@@ -19,7 +21,7 @@ public class ChatHubAuthorizationFilter : IHubFilter
         }
         catch (ChatException ex)
         {
-            await invocationContext.Hub.Clients.Caller.SendAsync("Unathorized",
+            await invocationContext.Hub.Clients.Caller.SendAsync(SignalRClientMethods.Unauthorized,
                 new UnauthorizedAccessContext { Message = ex.Message, StatusCode = HttpStatusCode.Unauthorized});
             invocationContext.Context.Abort();
             return ex;

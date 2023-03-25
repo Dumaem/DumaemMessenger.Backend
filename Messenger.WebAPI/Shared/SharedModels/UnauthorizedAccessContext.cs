@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace Messenger.WebAPI.Shared;
+namespace Messenger.WebAPI.Shared.SharedModels;
 
 public class UnauthorizedAccessContext
 {
