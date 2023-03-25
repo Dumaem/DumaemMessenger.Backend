@@ -6,7 +6,7 @@ namespace Messenger.Domain.Services.Impl;
 
 public class ChatService : IChatService
 {
-    private IChatRepository _repository;
+    private readonly IChatRepository _repository;
 
     public ChatService(IChatRepository repository)
     {
@@ -26,5 +26,10 @@ public class ChatService : IChatService
     public async Task<IEnumerable<User>> GetChatParticipantsAsync(string chatName)
     {
         return await _repository.GetChatParticipantsAsync(chatName);
+    }
+
+    public async Task<bool> IsChatExistsAsync(string chatId)
+    {
+        return await _repository.IsChatExistsAsync(chatId);
     }
 }
