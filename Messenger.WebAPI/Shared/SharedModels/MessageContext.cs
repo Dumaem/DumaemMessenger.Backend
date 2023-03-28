@@ -2,6 +2,7 @@
 
 public class MessageContext
 {
+    public required int ContentType { get; set; }
     public required object Content { get; set; }
     public required int UserId { get; set; }
     public required DateTime SendDate { get; set; }

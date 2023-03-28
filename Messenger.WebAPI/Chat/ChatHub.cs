@@ -1,6 +1,7 @@
 ﻿using Messenger.Domain.Enums;
 using Messenger.Domain.Exception;
 using Messenger.Domain.Models;
+using Messenger.Domain.Results;
 using Messenger.Domain.Services;
 using Messenger.WebAPI.Shared;
 using Messenger.WebAPI.Shared.Client;
@@ -54,6 +55,12 @@ public class ChatHub : Hub
 
     public async Task SendMessageToChat(MessageContext message)
     {
+        if (!await _chatService.IsChatExistsAsync(message.ChatId))
+        {
+            var result = new BaseResult { Success = true, Message = "Passed chat does not exits" };
+            await Clients.Caller.SendAsync(SignalRClientMethods.MessageNotDelivered, result);
+            return;
+        }
         await Clients.Group(message.ChatId).SendAsync(SignalRClientMethods.ReceiveMessage, message);
     }
 
