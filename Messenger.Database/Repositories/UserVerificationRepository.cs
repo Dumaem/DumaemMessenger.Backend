@@ -2,6 +2,7 @@
 using Messenger.Database.Read;
 using Messenger.Database.Read.Queries;
 using Messenger.Database.Write;
+using Messenger.Domain.Models;
 using Messenger.Domain.Repositories;
 
 namespace Messenger.Database.Repositories;
@@ -19,6 +20,13 @@ public class UserVerificationRepository : IUserVerificationRepository
     {
         var res = await _readonlyContext.Connection.QuerySingleOrDefaultAsync<(string?, DateTime)>(
             UserVerificationRepositoryQueries.GetVerifyToken, new {userId});
+        return res;
+    }
+
+    public async Task<User?> GetUserByToken(string token)
+    {
+        var res = await _readonlyContext.Connection.QuerySingleOrDefaultAsync<User>(
+            UserVerificationRepositoryQueries.GetUserByToken, new{token});
         return res;
     }
 

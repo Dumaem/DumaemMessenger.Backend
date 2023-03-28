@@ -63,16 +63,14 @@ public class AuthorizationController : ControllerBase
     public async Task<IActionResult> CreateVerifyToken(string userEmail)
     {
         var result = await _authorizationService.GenerateUserVerifyToken(userEmail);
-        if (!result.Success)
-            return BadRequest(result.Message);
-        return Ok();
+        return VerifyResult(result);
     }
     
     [HttpPost]
     [Route("verify")]
-    public async Task<IActionResult> Verify([FromBody] UserVerifyCredentials credentials)
+    public async Task<IActionResult> Verify([FromQuery] string token)
     {
-        var result = await _authorizationService.VerifyUser(credentials.VerifyToken, credentials.UserEmail);
+        var result = await _authorizationService.VerifyUser(token);
         if (!result.Success)
             return BadRequest(result.Message);
         return Ok();
@@ -92,5 +90,13 @@ public class AuthorizationController : ControllerBase
             AccessToken = result.Token!.AccessToken,
             RefreshToken = result.Token.RefreshToken
         });
+    }
+
+    private IActionResult VerifyResult(VerificationResult result)
+    {
+        if (!result.Success)
+            return BadRequest(result.Message);
+
+        return Ok(result.Token);
     }
 }

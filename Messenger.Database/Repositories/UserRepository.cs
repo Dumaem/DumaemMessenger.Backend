@@ -28,7 +28,8 @@ public class UserRepository : IUserRepository
             ? null
             : new User
             {
-                Username = res.Username, Name = res.Name, Email = res.Email, Id = res.Id
+                Username = res.Username, Name = res.Name, Email = res.Email, Id = res.Id,
+                IsVerified = res.IsVerified
             };
     }
 

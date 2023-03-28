@@ -192,53 +192,49 @@ public class AuthorizationService : IAuthorizationService
     /// <summary>
     /// Creating a new user verify token if it doesn't actually exist
     /// </summary>
-    public async Task<BaseResult> GenerateUserVerifyToken(string email)
+    public async Task<VerificationResult> GenerateUserVerifyToken(string email)
     {
         var user = await _userService.GetUserByEmailAsync(email);
         if (user is null)
-            return new BaseResult {Message = "User does not exist", Success = false};
+            return new VerificationResult {Message = UserErrorMessage.NotExistUser, Success = false};
 
         if (user.IsVerified)
-            return new BaseResult {Message = "User already verified", Success = false};
+            return new VerificationResult {Message = UserErrorMessage.UserAlreadyVerified, Success = false};
 
         var existingToken = await _userVerificationRepository.GetExistingVerifyToken(user.Id);
 
         if (existingToken.Item1 is not null)
-            return new BaseResult {Message = "User already has actual token", Success = false};
+            return new VerificationResult {Message = UserErrorMessage.HasActualVerifyToken, Success = false};
 
         var token = Guid.NewGuid().ToString();
         var expiryDate = DateTime.UtcNow.AddHours(1);
         await _userVerificationRepository.CreateVerifyToken(token, expiryDate, user.Id);
 
-        return new BaseResult
-        {
-            Message = token, 
-            Success = true
-        };
+        return new VerificationResult {Success = true, Token = token};
     }
 
-    public async Task<BaseResult> VerifyUser(string token, string userEmail)
+    public async Task<BaseResult> VerifyUser(string token)
     {
-        var user = await _userService.GetUserByEmailAsync(userEmail);
+        var user = await _userVerificationRepository.GetUserByToken(token);
         if (user is null)
-            return new BaseResult {Message = "User does not exist", Success = false};
+            return new BaseResult {Message = UserErrorMessage.NotExistUser, Success = false};
 
         if (user.IsVerified)
-            return new BaseResult {Message = "User already verified", Success = false};
+            return new BaseResult {Message = UserErrorMessage.UserAlreadyVerified, Success = false};
 
         var existingToken = await _userVerificationRepository.GetExistingVerifyToken(user.Id);
 
         if (existingToken.Item1 is null)
-            return new BaseResult {Message = "User don't have a verification token", Success = false};
+            return new BaseResult {Message = UserErrorMessage.DontHasActualVerifyToken, Success = false};
 
         if (existingToken.Item2 <= DateTime.UtcNow)
         {
             await  _userVerificationRepository.RevokeExpiredToken(existingToken.Item1);
-            return new BaseResult {Message = "Token is expired", Success = false};   
+            return new BaseResult {Message = UserErrorMessage.ExpiredVerifyToken, Success = false};   
         }
 
         await _userVerificationRepository.VerifyUser(user.Id);
 
-        return new BaseResult {Success = true};
+        return new BaseResult(){Success = true};
     }
 }
