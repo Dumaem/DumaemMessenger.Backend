@@ -21,4 +21,6 @@ internal static class ChatRepositoryQueries
                                                         JOIN public.chat c 
                                                             ON uc.chat_id = c.id 
                                                     WHERE c.name = @chatName";
+
+    internal const string IsChatExists = $@"SELECT EXISTS(SELECT FROM public.chat c WHERE name=@chatId)";
 }

@@ -59,4 +59,10 @@ public class ChatRepository : IChatRepository
             Email = x.Email, Name = x.Name, Username = x.Username, Id = x.Id
         });
     }
+
+    public async Task<bool> IsChatExistsAsync(string chatId)
+    {
+        return await _readonlyContext.Connection.ExecuteScalarAsync<bool>(ChatRepositoryQueries.IsChatExists,
+            new { chatId });
+    }
 }
