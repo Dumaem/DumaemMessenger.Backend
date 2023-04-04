@@ -12,6 +12,8 @@ public class UserDb
 
     public string Email { get; set; } = null!;
 
+    public bool IsVerified { get; set; }
+
     public virtual ICollection<DeletedMessageDb> DeletedMessages { get; } = new List<DeletedMessageDb>();
 
     public virtual ICollection<MessageDb> Messages { get; } = new List<MessageDb>();
