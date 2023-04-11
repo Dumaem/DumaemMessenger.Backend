@@ -9,4 +9,5 @@ public interface IChatService
     public Task<IEnumerable<Chat>> GetChatsForUserAsync(string email);
     public Task<IEnumerable<User>> GetChatParticipantsAsync(string chatName);
     public Task<bool> IsChatExistsAsync(string chatId);
+    public Task<BaseResult> AddMemberToChatAsync(int chatId, int userId);
 }
