@@ -21,6 +21,7 @@ public class AuthorizationTests
     private readonly IAuthorizationService _authorizationService;
     private const string DefaultDeviceId = "defaultDeviceId";
     private readonly TokenValidationParameters _tokenValidationParameters;
+    private readonly Mock<IUserVerificationRepository> _userVerficationRepository;
 
     public AuthorizationTests()
     {
@@ -28,6 +29,7 @@ public class AuthorizationTests
         _refreshTokenRepositoryMock = new Mock<IRefreshTokenRepository>();
         _jwtSettingsMock = new Mock<JwtSettings>();
         _encryptionService = new Mock<IEncryptionService>();
+        _userVerficationRepository = new Mock<IUserVerificationRepository>();
         _tokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
@@ -40,7 +42,8 @@ public class AuthorizationTests
         };
 
         _authorizationService = new AuthorizationService(_userServiceMock.Object, _jwtSettingsMock.Object,
-            _tokenValidationParameters, _refreshTokenRepositoryMock.Object, _encryptionService.Object);
+            _tokenValidationParameters, _refreshTokenRepositoryMock.Object, _encryptionService.Object,
+            _userVerficationRepository.Object);
     }
 
     #region RegisterAsync
@@ -64,7 +67,7 @@ public class AuthorizationTests
         _encryptionService.Setup(x => x.EncryptStringAsync(It.IsAny<string>()))
             .ReturnsAsync(DefaultDeviceId);
         _userServiceMock.Setup(x => x.GetUserByEmailAsync(It.IsAny<string>()))
-            .ReturnsAsync((User?)null);
+            .ReturnsAsync((User?) null);
         _userServiceMock.Setup(x => x.CreateUserAsync(It.IsAny<User>(), It.IsAny<string>()))
             .ReturnsAsync(It.IsAny<int>());
         _jwtSettingsMock.SetupJwtSettingsMock();
@@ -87,7 +90,7 @@ public class AuthorizationTests
     public async Task AuthorizeAsync_NotExistUser_ShouldReturnUnsuccessfulResult()
     {
         _userServiceMock.Setup(x => x.GetUserByEmailAsync(It.IsAny<string>()))
-            .ReturnsAsync((User?)null);
+            .ReturnsAsync((User?) null);
 
         var res = await _authorizationService.AuthorizeAsync(It.IsAny<string>(),
             It.IsAny<string>(), It.IsAny<string>());
@@ -193,7 +196,7 @@ public class AuthorizationTests
         var accessToken = tokenHandler.CreateToken(tokenDescriptor);
 
         _refreshTokenRepositoryMock.Setup(x => x.GetTokenAsync(It.IsAny<string>()))
-            .ReturnsAsync((RefreshToken?)null);
+            .ReturnsAsync((RefreshToken?) null);
 
         var res = await _authorizationService.RefreshAsync(tokenHandler.WriteToken(accessToken),
             It.IsAny<string>(), It.IsAny<string>());

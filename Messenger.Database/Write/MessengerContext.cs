@@ -188,6 +188,7 @@ public class MessengerContext : DbContext
             entity.Property(e => e.Email)
                 .HasMaxLength(255)
                 .HasColumnName("email");
+            entity.Property(e => e.IsVerified).HasColumnName("is_verified");
             entity.Property(e => e.Name).HasColumnName("name");
             entity.Property(e => e.Password)
                 .HasMaxLength(32)

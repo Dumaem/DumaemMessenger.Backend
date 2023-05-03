@@ -18,16 +18,18 @@ public class AuthorizationService : IAuthorizationService
     private readonly JwtSettings _jwtSettings;
     private readonly TokenValidationParameters _tokenValidationParameters;
     private readonly IEncryptionService _encryptionService;
+    private readonly IUserVerificationRepository _userVerificationRepository;
 
     public AuthorizationService(IUserService userService, JwtSettings jwtSettings,
         TokenValidationParameters tokenValidationParameters, IRefreshTokenRepository refreshTokenRepository,
-        IEncryptionService encryptionService)
+        IEncryptionService encryptionService, IUserVerificationRepository userVerificationRepository)
     {
         _userService = userService;
         _jwtSettings = jwtSettings;
         _tokenValidationParameters = tokenValidationParameters;
         _refreshTokenRepository = refreshTokenRepository;
         _encryptionService = encryptionService;
+        _userVerificationRepository = userVerificationRepository;
     }
 
     public async Task<AuthenticationResult> RegisterAsync(string name, string email, string password, string? username,
@@ -36,7 +38,7 @@ public class AuthorizationService : IAuthorizationService
         var existingUser = await _userService.GetUserByEmailAsync(email);
 
         if (existingUser is not null)
-            return new AuthenticationResult { Success = false, Message = "User with this email already exists" };
+            return new AuthenticationResult {Success = false, Message = "User with this email already exists"};
 
         var user = new User
         {
@@ -54,12 +56,12 @@ public class AuthorizationService : IAuthorizationService
         var existingUser = await _userService.GetUserByEmailAsync(email);
 
         if (existingUser is null)
-            return new AuthenticationResult { Success = false, Message = "User does not exist" };
+            return new AuthenticationResult {Success = false, Message = "User does not exist"};
 
         var isPasswordValid = await _userService.CheckUserPasswordAsync(existingUser.Id, password);
 
         if (!isPasswordValid)
-            return new AuthenticationResult { Success = false, Message = "User has wrong password" };
+            return new AuthenticationResult {Success = false, Message = "User has wrong password"};
 
         var deviceId = await GenerateDeviceId(userAgent);
         await RevokeActualTokenIfExists(existingUser.Id, deviceId);
@@ -72,17 +74,17 @@ public class AuthorizationService : IAuthorizationService
         var validatedToken = GetPrincipalFromToken(token);
 
         if (validatedToken == null)
-            return new AuthenticationResult { Success = false, Message = RefreshTokenErrorMessages.InvalidToken };
+            return new AuthenticationResult {Success = false, Message = RefreshTokenErrorMessages.InvalidToken};
 
         var jti = validatedToken.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
 
         var storedRefreshToken = await _refreshTokenRepository.GetTokenAsync(refreshToken);
 
         if (storedRefreshToken is null || storedRefreshToken.JwtId != jti)
-            return new AuthenticationResult { Success = false, Message = RefreshTokenErrorMessages.UnrecognizedToken };
+            return new AuthenticationResult {Success = false, Message = RefreshTokenErrorMessages.UnrecognizedToken};
 
         if (storedRefreshToken.ExpiryDate < DateTime.UtcNow)
-            return new AuthenticationResult { Success = false, Message = RefreshTokenErrorMessages.ExpiredToken };
+            return new AuthenticationResult {Success = false, Message = RefreshTokenErrorMessages.ExpiredToken};
 
 
         int.TryParse(validatedToken.Claims.Single(x => x.Type == "id").Value, out var userId);
@@ -92,7 +94,7 @@ public class AuthorizationService : IAuthorizationService
         if (storedRefreshToken.IsRevoked || storedRefreshToken.IsUsed)
         {
             await RevokeActualTokenIfExists(user!.Id, deviceId);
-            return new AuthenticationResult { Success = false, Message = RefreshTokenErrorMessages.UsedToken };
+            return new AuthenticationResult {Success = false, Message = RefreshTokenErrorMessages.UsedToken};
         }
 
         await _refreshTokenRepository.UseTokenAsync(storedRefreshToken.Id);
@@ -185,5 +187,54 @@ public class AuthorizationService : IAuthorizationService
     private async Task RevokeActualTokenIfExists(int userId, string deviceId)
     {
         await _refreshTokenRepository.RevokeTokenIfExistsAsync(userId, deviceId);
+    }
+
+    /// <summary>
+    /// Creating a new user verify token if it doesn't actually exist
+    /// </summary>
+    public async Task<VerificationResult> GenerateUserVerifyToken(string email)
+    {
+        var user = await _userService.GetUserByEmailAsync(email);
+        if (user is null)
+            return new VerificationResult {Message = UserErrorMessage.NotExistUser, Success = false};
+
+        if (user.IsVerified)
+            return new VerificationResult {Message = UserErrorMessage.UserAlreadyVerified, Success = false};
+
+        var existingToken = await _userVerificationRepository.GetExistingVerifyToken(user.Id);
+
+        if (existingToken.Item1 is not null)
+            return new VerificationResult {Message = UserErrorMessage.HasActualVerifyToken, Success = false};
+
+        var token = Guid.NewGuid().ToString();
+        var expiryDate = DateTime.UtcNow.AddHours(1);
+        await _userVerificationRepository.CreateVerifyToken(token, expiryDate, user.Id);
+
+        return new VerificationResult {Success = true, Token = token};
+    }
+
+    public async Task<BaseResult> VerifyUser(string token)
+    {
+        var user = await _userVerificationRepository.GetUserByToken(token);
+        if (user is null)
+            return new BaseResult {Message = UserErrorMessage.NotExistUser, Success = false};
+
+        if (user.IsVerified)
+            return new BaseResult {Message = UserErrorMessage.UserAlreadyVerified, Success = false};
+
+        var existingToken = await _userVerificationRepository.GetExistingVerifyToken(user.Id);
+
+        if (existingToken.Item1 is null)
+            return new BaseResult {Message = UserErrorMessage.DontHasActualVerifyToken, Success = false};
+
+        if (existingToken.Item2 <= DateTime.UtcNow)
+        {
+            await  _userVerificationRepository.RevokeExpiredToken(existingToken.Item1);
+            return new BaseResult {Message = UserErrorMessage.ExpiredVerifyToken, Success = false};   
+        }
+
+        await _userVerificationRepository.VerifyUser(user.Id);
+
+        return new BaseResult(){Success = true};
     }
 }

@@ -16,6 +16,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IMessageRepository, MessageRepository>();
         services.AddScoped<IChatRepository, ChatRepository>();
+        services.AddScoped<IUserVerificationRepository, UserVerificationRepository>();
 
         return services;
     }

@@ -58,6 +58,25 @@ public class AuthorizationController : ControllerBase
         return VerifyAuthenticationResult(result);
     }
 
+    [HttpPost]
+    [Route("create_verify_token")]
+    public async Task<IActionResult> CreateVerifyToken(string userEmail)
+    {
+        var result = await _authorizationService.GenerateUserVerifyToken(userEmail);
+        return VerifyResult(result);
+    }
+    
+    [HttpPost]
+    [Route("verify")]
+    public async Task<IActionResult> Verify([FromQuery] string token)
+    {
+        var result = await _authorizationService.VerifyUser(token);
+        if (!result.Success)
+            return BadRequest(result.Message);
+        return Ok();
+    }
+
+
     /// <summary>
     /// Returns HTTP responses that is appropriate to the authentication result
     /// </summary>
@@ -72,5 +91,13 @@ public class AuthorizationController : ControllerBase
             RefreshToken = result.Token.RefreshToken,
             UserId = result.UserId
         });
+    }
+
+    private IActionResult VerifyResult(VerificationResult result)
+    {
+        if (!result.Success)
+            return BadRequest(result.Message);
+
+        return Ok(result.Token);
     }
 }
