@@ -5,6 +5,7 @@ using Messenger.Database.Read.Queries;
 using Messenger.Database.Write;
 using Messenger.Domain.Models;
 using Messenger.Domain.Repositories;
+using Messenger.Domain.Results;
 
 namespace Messenger.Database.Repositories;
 
@@ -35,13 +36,13 @@ public class ChatRepository : IChatRepository
         }
 
         await _context.SaveChangesAsync();
-        return new DatabaseCreateResult { Success = true, ObjectId = chat.Id, Message = chat.Name };
+        return new DatabaseCreateResult {Success = true, ObjectId = chat.Id, Message = chat.Name};
     }
 
     public async Task<IEnumerable<Chat>> GetChatsForUserAsync(string email)
     {
         var chats = await _readonlyContext.Connection
-            .QueryAsync<ChatDb>(ChatRepositoryQueries.GetChatsForUserAsync, new { email });
+            .QueryAsync<ChatDb>(ChatRepositoryQueries.GetChatsForUserAsync, new {email});
 
         return chats.Select(x => new Chat
         {
@@ -52,7 +53,7 @@ public class ChatRepository : IChatRepository
     public async Task<IEnumerable<User>> GetChatParticipantsAsync(string chatName)
     {
         var users = await _readonlyContext.Connection
-            .QueryAsync<UserDb>(ChatRepositoryQueries.GetChatParticipants, new { chatName });
+            .QueryAsync<UserDb>(ChatRepositoryQueries.GetChatParticipants, new {chatName});
 
         return users.Select(x => new User
         {
@@ -63,6 +64,18 @@ public class ChatRepository : IChatRepository
     public async Task<bool> IsChatExistsAsync(string chatId)
     {
         return await _readonlyContext.Connection.ExecuteScalarAsync<bool>(ChatRepositoryQueries.IsChatExists,
-            new { chatId });
+            new {chatId});
+    }
+
+    public async Task<BaseResult> AddMemberToChat(int chatId, int userId)
+    {
+        _context.UserChats.Add(new UserChatDb
+        {
+            UserId = userId,
+            ChatId = chatId
+        });
+        await _context.SaveChangesAsync();
+
+        return new BaseResult { Success = true};
     }
 }

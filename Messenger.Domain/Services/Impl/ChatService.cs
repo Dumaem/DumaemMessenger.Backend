@@ -32,4 +32,9 @@ public class ChatService : IChatService
     {
         return await _repository.IsChatExistsAsync(chatId);
     }
+
+    public async Task<BaseResult> AddMemberToChatAsync(int chatId, int userId)
+    {
+        return await _repository.AddMemberToChat(chatId, userId);
+    }
 }
