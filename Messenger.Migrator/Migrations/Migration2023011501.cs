@@ -1,5 +1,4 @@
-﻿using FluentMigrator;
-using Messenger.Domain.Validation.Validators;
+﻿using Messenger.Domain.Validation.Validators;
 
 namespace Messenger.Migrator.Migrations;
 
