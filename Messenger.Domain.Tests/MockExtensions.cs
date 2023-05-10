@@ -1,6 +1,4 @@
-﻿using System.Text;
-using Messenger.Domain.Settings;
-using Microsoft.IdentityModel.Tokens;
+﻿using Messenger.Domain.Settings;
 
 namespace Messenger.Domain.Tests;
 

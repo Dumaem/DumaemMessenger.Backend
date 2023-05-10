@@ -1,5 +1,4 @@
-﻿using FluentMigrator;
-using Npgsql;
+﻿using Npgsql;
 
 namespace Messenger.Migrator;
 
