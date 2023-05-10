@@ -64,4 +64,14 @@ public class ChatController : ControllerBase
             return BadRequest();
         return Ok(result);
     }
+    
+    [HttpPost]
+    [Route("add-member-to-chat")]
+    public async Task<IActionResult> GetUser([FromBody] int chatId, int userId)
+    {
+        var result = await _chatService.AddMemberToChatAsync(chatId, userId);
+        if(!result.Success)
+            return BadRequest(result.Message);
+        return Ok(result);
+    }
 }
