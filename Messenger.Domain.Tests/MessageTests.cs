@@ -2,14 +2,6 @@
 using Messenger.Domain.Repositories;
 using Messenger.Domain.Services;
 using Messenger.Domain.Services.Impl;
-using Messenger.Domain.Settings;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Messenger.Domain.Tests
 {

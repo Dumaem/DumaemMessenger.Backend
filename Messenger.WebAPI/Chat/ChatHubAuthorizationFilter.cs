@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using Messenger.Domain.Exception;
-using Messenger.WebAPI.Shared;
 using Messenger.WebAPI.Shared.Client;
 using Messenger.WebAPI.Shared.SharedModels;
 using Microsoft.AspNetCore.SignalR;

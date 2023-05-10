@@ -34,7 +34,7 @@ public class ChatService : IChatService
         return await _repository.GetChatParticipantsAsync(chatName);
     }
 
-    public async Task<ChatResult> GetChatByName(string name)
+    public async Task<ChatResult> GetChatByNameAsync(string name)
     {
         var res = await _repository.GetChatByName(name);
         return res is null ? 

@@ -38,7 +38,7 @@ public class ChatController : ControllerBase
     [Route("get-chat-by-name")]
     public async Task<IActionResult> GetChatByName([FromQuery] string name)
     {
-        var result = await _chatService.GetChatByName(name);
+        var result = await _chatService.GetChatByNameAsync(name);
         if (!result.Success)
             return BadRequest(result.Message);
         return Ok(result.Chat);
