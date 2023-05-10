@@ -28,7 +28,6 @@ public class ChatRepository : IChatRepository
             Name = Guid.NewGuid().ToString(),
             GroupName = groupName,
             IsPersonal = isPersonal,
-            Notifications = true
         };
 
         foreach (var user in participants)

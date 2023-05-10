@@ -23,12 +23,12 @@ public class ChatController : ControllerBase
         BaseResult result;
         if (!credentials.IsPersonal)
         {
-            result = await _chatService.CreateChatAsync(credentials.Participants, credentials.GroupName);
+            result = await _chatService.CreateChatAsync(credentials.Participants, credentials.GroupName!);
         }
         else
         {
             result = await _chatService.CreatePersonalChatAsync(credentials.Participants.Last(),
-                credentials.CurrentUser);
+                credentials.CurrentUser!);
         }
         if (!result.Success)
             return BadRequest(result.Message);

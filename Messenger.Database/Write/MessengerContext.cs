@@ -42,7 +42,6 @@ public class MessengerContext : DbContext
             entity.Property(e => e.Name).HasColumnName("name");
             entity.Property(e => e.IsPersonal).HasColumnName("isPersonal");
             entity.Property(e => e.GroupName).HasColumnName("groupName");
-            entity.Property(e => e.Notifications).HasColumnName("notofocations");
         });
 
         modelBuilder.Entity<ContentTypeDb>(entity =>

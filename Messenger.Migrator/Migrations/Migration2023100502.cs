@@ -9,10 +9,6 @@
                 .AddColumn("groupName")
                 .AsString(50)
                 .Nullable();
-            Alter.Table("chat")
-                .AddColumn("notifications")
-                .AsBoolean()
-                .WithDefaultValue(true);
         }
     }
 }

@@ -6,6 +6,5 @@ public class Chat
 
     public string Name { get; set; } = null!;
     public string? GroupName { get; set; }
-    public bool Notifications { get; set; }
     public bool IsPersonal { get; set; }
 }
