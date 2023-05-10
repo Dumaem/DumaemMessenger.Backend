@@ -23,11 +23,12 @@ public class ChatController : ControllerBase
         BaseResult result;
         if (!credentials.IsPersonal)
         {
-            result = await _chatService.CreateChatAsync(credentials.Participants);
+            result = await _chatService.CreateChatAsync(credentials.Participants, credentials.GroupName);
         }
         else
         {
-            result = await _chatService.CreatePersonalChatAsync(credentials.Participants.Last());
+            result = await _chatService.CreatePersonalChatAsync(credentials.Participants.Last(),
+                credentials.CurrentUser);
         }
         if (!result.Success)
             return BadRequest(result.Message);
@@ -42,5 +43,15 @@ public class ChatController : ControllerBase
         if (!result.Success)
             return BadRequest(result.Message);
         return Ok(result.Chat);
+    }
+
+    [HttpGet]
+    [Route("get-chat-members")]
+    public async Task<IActionResult> GetChatMembers([FromQuery] string name)
+    {
+        var result = await _chatService.GetChatParticipantsAsync(name);
+        if(!result.Any())
+            return BadRequest();
+        return Ok(result);
     }
 }

@@ -14,14 +14,15 @@ public class ChatService : IChatService
         _repository = repository;
     }
 
-    public async Task<BaseResult> CreateChatAsync(IEnumerable<User> participants)
+    public async Task<BaseResult> CreateChatAsync(IEnumerable<User> participants, string groupName)
     {
-        return await _repository.CreateChatAsync(participants);
+        return await _repository.CreateChatAsync(participants, false, groupName);
     }
 
-    public async Task<BaseResult> CreatePersonalChatAsync(User participant)
+    public async Task<BaseResult> CreatePersonalChatAsync(User participant, User currentUser)
     {
-        return await _repository.CreatePersonalChatAsync(participant);
+        var participants = new List<User>{participant,currentUser};
+        return await _repository.CreateChatAsync(participants, true, null);
     }
 
     public async Task<IEnumerable<Chat>> GetChatsForUserAsync(string email)

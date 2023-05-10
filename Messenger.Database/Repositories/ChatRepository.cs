@@ -20,11 +20,15 @@ public class ChatRepository : IChatRepository
         _readonlyContext = readonlyContext;
     }
 
-    public async Task<DatabaseCreateResult> CreateChatAsync(IEnumerable<User> participants)
+    public async Task<DatabaseCreateResult> CreateChatAsync(IEnumerable<User> participants, bool isPersonal,
+        string? groupName)
     {
         var chat = new ChatDb
         {
-            Name = Guid.NewGuid().ToString()
+            Name = Guid.NewGuid().ToString(),
+            GroupName = groupName,
+            IsPersonal = isPersonal,
+            Notifications = true
         };
 
         foreach (var user in participants)
@@ -34,22 +38,6 @@ public class ChatRepository : IChatRepository
                 Chat = chat, UserId = user.Id
             });
         }
-
-        await _context.SaveChangesAsync();
-        return new DatabaseCreateResult {Success = true, ObjectId = chat.Id, Message = chat.Name};
-    }
-
-    public async Task<DatabaseCreateResult> CreatePersonalChatAsync(User participant)
-    {
-        var chat = new ChatDb
-        {
-            Name = Guid.NewGuid().ToString(),
-            IsPersonal = true
-        };
-        _context.UserChats.Add(new UserChatDb
-        {
-            Chat = chat, UserId = participant.Id
-        });
 
         await _context.SaveChangesAsync();
         return new DatabaseCreateResult {Success = true, ObjectId = chat.Id, Message = chat.Name};
@@ -79,13 +67,14 @@ public class ChatRepository : IChatRepository
 
     public async Task<Chat?> GetChatByName(string name)
     {
-        var res = await _readonlyContext.Connection.QuerySingleOrDefaultAsync<ChatDb>(ChatRepositoryQueries.GetChatByName,
+        var res = await _readonlyContext.Connection.QuerySingleOrDefaultAsync<ChatDb>(
+            ChatRepositoryQueries.GetChatByName,
             new {name});
         return res is null
             ? null
             : new Chat
             {
-               Id = res.Id, Name = res.Name, IsPersonal = res.IsPersonal
+                Id = res.Id, Name = res.Name, IsPersonal = res.IsPersonal
             };
     }
 
@@ -104,6 +93,6 @@ public class ChatRepository : IChatRepository
         });
         await _context.SaveChangesAsync();
 
-        return new BaseResult { Success = true};
+        return new BaseResult {Success = true};
     }
 }
