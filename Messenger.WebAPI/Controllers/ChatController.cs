@@ -54,4 +54,14 @@ public class ChatController : ControllerBase
             return BadRequest();
         return Ok(result);
     }
+    
+    [HttpGet]
+    [Route("get-user-chats")]
+    public async Task<IActionResult> GetUser([FromQuery] string email)
+    {
+        var result = await _chatService.GetChatsForUserAsync(email);
+        if(!result.Any())
+            return BadRequest();
+        return Ok(result);
+    }
 }
