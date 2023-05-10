@@ -1,4 +1,5 @@
-﻿using Messenger.Domain.Models;
+﻿using Messenger.Domain.ErrorMessages;
+using Messenger.Domain.Models;
 using Messenger.Domain.Repositories;
 using Messenger.Domain.Results;
 
@@ -18,6 +19,11 @@ public class ChatService : IChatService
         return await _repository.CreateChatAsync(participants);
     }
 
+    public async Task<BaseResult> CreatePersonalChatAsync(User participant)
+    {
+        return await _repository.CreatePersonalChatAsync(participant);
+    }
+
     public async Task<IEnumerable<Chat>> GetChatsForUserAsync(string email)
     {
         return await _repository.GetChatsForUserAsync(email);
@@ -26,6 +32,14 @@ public class ChatService : IChatService
     public async Task<IEnumerable<User>> GetChatParticipantsAsync(string chatName)
     {
         return await _repository.GetChatParticipantsAsync(chatName);
+    }
+
+    public async Task<ChatResult> GetChatByName(string name)
+    {
+        var res = await _repository.GetChatByName(name);
+        return res is null ? 
+            new ChatResult{Message = string.Format(ChatErrorMessages.ChatWithNameNotFound, name)} 
+            : new ChatResult{Chat = res, Success = true};
     }
 
     public async Task<bool> IsChatExistsAsync(string chatId)

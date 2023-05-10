@@ -7,8 +7,10 @@ namespace Messenger.Domain.Repositories;
 public interface IChatRepository
 {
     public Task<DatabaseCreateResult> CreateChatAsync(IEnumerable<User> participants);
+    public Task<DatabaseCreateResult> CreatePersonalChatAsync(User participant);
     public Task<IEnumerable<Chat>> GetChatsForUserAsync(string email);
     public Task<IEnumerable<User>> GetChatParticipantsAsync(string chatName);
+    public Task<Chat?> GetChatByName(string name);
     public Task<bool> IsChatExistsAsync(string chatId);
     public Task<BaseResult> AddMemberToChat(int chatId, int userId);
 }

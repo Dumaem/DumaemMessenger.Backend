@@ -39,6 +39,22 @@ public class ChatRepository : IChatRepository
         return new DatabaseCreateResult {Success = true, ObjectId = chat.Id, Message = chat.Name};
     }
 
+    public async Task<DatabaseCreateResult> CreatePersonalChatAsync(User participant)
+    {
+        var chat = new ChatDb
+        {
+            Name = Guid.NewGuid().ToString(),
+            IsPersonal = true
+        };
+        _context.UserChats.Add(new UserChatDb
+        {
+            Chat = chat, UserId = participant.Id
+        });
+
+        await _context.SaveChangesAsync();
+        return new DatabaseCreateResult {Success = true, ObjectId = chat.Id, Message = chat.Name};
+    }
+
     public async Task<IEnumerable<Chat>> GetChatsForUserAsync(string email)
     {
         var chats = await _readonlyContext.Connection
@@ -59,6 +75,18 @@ public class ChatRepository : IChatRepository
         {
             Email = x.Email, Name = x.Name, Username = x.Username, Id = x.Id
         });
+    }
+
+    public async Task<Chat?> GetChatByName(string name)
+    {
+        var res = await _readonlyContext.Connection.QuerySingleOrDefaultAsync<ChatDb>(ChatRepositoryQueries.GetChatByName,
+            new {name});
+        return res is null
+            ? null
+            : new Chat
+            {
+               Id = res.Id, Name = res.Name, IsPersonal = res.IsPersonal
+            };
     }
 
     public async Task<bool> IsChatExistsAsync(string chatId)

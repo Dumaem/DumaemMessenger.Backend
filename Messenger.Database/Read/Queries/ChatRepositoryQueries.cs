@@ -23,4 +23,5 @@ internal static class ChatRepositoryQueries
                                                     WHERE c.name = @chatName";
 
     internal const string IsChatExists = $@"SELECT EXISTS(SELECT FROM public.chat c WHERE name=@chatId)";
+    internal const string GetChatByName = $@"SELECT * FROM chat WHERE name = @name";
 }
