@@ -25,7 +25,8 @@ public class ChatController : ControllerBase
         BaseResult result;
         if (!credentials.IsPersonal)
         {
-            result = await _chatService.CreateChatAsync(credentials.ParticipantsIds, credentials.GroupName!);
+            result = await _chatService.CreateChatAsync(credentials.ParticipantsIds, credentials.GroupName!,
+                credentials.CurrentUserId);
         }
         else
         {

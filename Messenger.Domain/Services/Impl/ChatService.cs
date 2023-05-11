@@ -16,20 +16,16 @@ public class ChatService : IChatService
         _userRepository = userRepository;
     }
 
-    public async Task<BaseResult> CreateChatAsync(IEnumerable<int> participants, string groupName)
+    public async Task<BaseResult> CreateChatAsync(IEnumerable<int> participants, string groupName,
+        int currentUserId)
     {
-        return await _repository.CreateChatAsync(participants, false, groupName);
+        return await _repository.CreateChatAsync(participants, false, groupName, currentUserId);
     }
 
     public async Task<BaseResult> CreatePersonalChatAsync(int participantId, int currentUserId)
     {
-        var participants = new List<int>{participantId,currentUserId};
-        var participant = await _userRepository.GetUserByIdAsync(participantId);
-        if (participant is null)
-        {
-            return new BaseResult { Success = false, Message = UserErrorMessage.NotExistUser};
-        }
-        return await _repository.CreateChatAsync(participants, true, participant.Name);
+        var participants = new List<int>{participantId};
+        return await _repository.CreateChatAsync(participants, true, null, currentUserId);
     }
 
     public async Task<IEnumerable<ChatResult>> GetChatsForUserAsync(string email)

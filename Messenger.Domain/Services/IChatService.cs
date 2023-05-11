@@ -5,7 +5,8 @@ namespace Messenger.Domain.Services;
 
 public interface IChatService
 {
-    public Task<BaseResult> CreateChatAsync(IEnumerable<int> participants, string groupName);
+    public Task<BaseResult> CreateChatAsync(IEnumerable<int> participants, string groupName,
+        int currentUserId);
     public Task<BaseResult> CreatePersonalChatAsync(int participant,int currentUser);
     public Task<IEnumerable<ChatResult>> GetChatsForUserAsync(string email);
     public Task<IEnumerable<User>> GetChatParticipantsAsync(string chatName);

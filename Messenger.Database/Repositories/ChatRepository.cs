@@ -22,7 +22,7 @@ public class ChatRepository : IChatRepository
     }
 
     public async Task<DatabaseCreateResult> CreateChatAsync(IEnumerable<int> participants, bool isPersonal,
-        string? groupName)
+        string? groupName, int currentUserId)
     {
         var chat = new ChatDb
         {
@@ -39,40 +39,62 @@ public class ChatRepository : IChatRepository
             });
         }
 
+        _context.UserChats.Add(new UserChatDb
+        {
+            Chat = chat, UserId = currentUserId 
+        });
+
         await _context.SaveChangesAsync();
         return new DatabaseCreateResult {Success = true, ObjectId = chat.Id, Message = chat.Name};
     }
 
-    public async Task<IEnumerable<ChatResult>> GetChatsForUserAsync(string email)
+    public Task<IEnumerable<ChatResult>> GetChatsForUserAsync(string email)
     {
         var user = _context.Users.First(x => x.Email == email);
         var userChatIds = _context.UserChats.Where(x => x.UserId == user.Id)
             .Select(x => x.ChatId);
         var userChats = _context.Chats.Include(x => x.Users)
-            .Include(x => x.Messages)
+            .Include(x => x.Messages).ThenInclude(x=>x.MessageContent)
             .Where(x => userChatIds.Contains(x.Id));
         var res = new List<ChatResult>();
-        foreach (var s in userChats)
+        foreach (var c in userChats)
         {
-            var lastMessage = s.Messages.Last();
-            var chat = new ChatResult
-            {
-                ChatId = s.Id,
-                ChatName = s.GroupName!,
-                LastMessage = new Message
+            var lastMessage = c.Messages.LastOrDefault();
+            res.Add(lastMessage is null
+                ? new ChatResult
                 {
-                    Id = lastMessage.Id,
-                    DateOfDispatch = lastMessage.DateOfDispatch,
-                    IsEdited = lastMessage.IsEdited,
-                    IsDeleted = lastMessage.IsDeleted,
-                    SenderId = lastMessage.SenderId,
-                    ChatId = lastMessage.ChatId,
-                    RepliedMessageId = lastMessage.RepliedMessageId,
-                    ForwardedMessageId = lastMessage.ForwardedMessageId,
-                    Content = lastMessage.MessageContents
-                },
-            };
+                    Success = true,
+                    ChatId = c.Id,
+                    ChatName = c.GroupName!,
+                    LastMessage = null
+                }
+                : new ChatResult
+                {
+                    Success = true,
+                    ChatId = c.Id,
+                    ChatName = c.GroupName!,
+                    LastMessage = new Message
+                    {
+                        Id = lastMessage.Id,
+                        DateOfDispatch = lastMessage.DateOfDispatch,
+                        IsEdited = lastMessage.IsEdited,
+                        IsDeleted = lastMessage.IsDeleted,
+                        SenderId = lastMessage.SenderId,
+                        ChatId = lastMessage.ChatId,
+                        RepliedMessageId = lastMessage.RepliedMessageId,
+                        ForwardedMessageId = lastMessage.ForwardedMessageId,
+                        Content = new MessageContent
+                        {
+                            Id = lastMessage.MessageContent.Id,
+                            Content = lastMessage.MessageContent.Content,
+                            TypeId = lastMessage.MessageContent.TypeId,
+                            MessageId = lastMessage.MessageContent.MessageId
+                        }
+                    },
+                });
         }
+
+        return Task.FromResult<IEnumerable<ChatResult>>(res);
     }
 
     public async Task<IEnumerable<User>> GetChatParticipantsAsync(string chatName)
