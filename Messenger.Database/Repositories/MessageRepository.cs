@@ -5,8 +5,11 @@ using Messenger.Database.Models;
 using Messenger.Database.Read;
 using Messenger.Database.Read.Queries;
 using Messenger.Database.Write;
+using Messenger.Domain.Exception;
 using Messenger.Domain.Models;
 using Messenger.Domain.Repositories;
+using Messenger.Domain.Results;
+using Microsoft.EntityFrameworkCore;
 
 namespace Messenger.Database.Repositories
 {
@@ -21,17 +24,38 @@ namespace Messenger.Database.Repositories
             _readonlyContext = readonlyContext;
         }
 
-        public async Task<long> CreateMessageAsync(Message message)
+        public async Task<ListDataResult<Message>> ListMessagesAsync(string chatId, int count, int offset)
         {
-            var messageContent = message.Content ?? throw new ValidationException("No message content");
+            var chat = await _context.Chats.FirstAsync(x => x.Name == chatId);
+            var messages = _context.Messages
+                .Include(x => x.MessageContent)
+                .Where(x => x.ChatId == chat.Id)
+                .OrderByDescending(x => x.DateOfDispatch)
+                .Skip(offset)
+                .Take(count);
+            return new ListDataResult<Message>
+            {
+                Success = true, Items = EntityConverter.ConvertMessages(messages),
+                TotalItemsCount = _context.Messages.Count()
+            };
+        }
+        
+        public async Task<string> GetShortMessagePreview(long messageId)
+        {
+            return (await _context.Messages
+                .Include(x => x.MessageContent)
+                .FirstAsync(x => x.Id == messageId)).MessageContent.Content[..20];
+        }
 
+        public async Task<long> CreateMessageAsync(Message message, string chatId)
+        {
+            var chat = await _context.Chats
+                .FirstOrDefaultAsync(x => x.Name == chatId) ?? throw new NotFoundException();
             var dbMessage = new MessageDb
             {
                 Id = message.Id,
-                ChatId = message.ChatId,
+                ChatId = chat.Id,
                 DateOfDispatch = message.DateOfDispatch,
-                IsDeleted = message.IsDeleted,
-                IsEdited = message.IsEdited,
                 SenderId = message.SenderId,
                 ForwardedMessageId = message.ForwardedMessageId,
                 RepliedMessageId = message.RepliedMessageId,
@@ -94,7 +118,7 @@ namespace Messenger.Database.Repositories
                 ForwardedMessageId = res.Message.ForwardedMessageId,
                 RepliedMessageId = res.Message.RepliedMessageId,
                 Content = new MessageContent
-                { Content = res.Content, MessageId = res.MessageId, TypeId = res.TypeId }
+                    { Content = res.Content, MessageId = res.MessageId, TypeId = res.TypeId }
             };
         }
 
