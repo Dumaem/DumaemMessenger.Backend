@@ -31,8 +31,8 @@ public class ChatHub : Hub
         var userChats = await _chatService.GetChatsForUserAsync(_user.Email);
         foreach (var chat in userChats)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, chat.Name);
-            await Clients.Group(chat.Name).SendAsync(SignalRClientMethods.StatusChanged,
+            await Groups.AddToGroupAsync(Context.ConnectionId, chat.Entity.Name);
+            await Clients.Group(chat.Entity.Name).SendAsync(SignalRClientMethods.StatusChanged,
                 new UserStatusContext { Status = UserOnlineStatus.Online, UserId = _user.Id });
         }
 
@@ -44,8 +44,8 @@ public class ChatHub : Hub
         var chats = await GetChatsForUserAsync();
         foreach (var chat in chats)
         {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, chat.Name);
-            await Clients.Group(chat.Name).SendAsync(SignalRClientMethods.StatusChanged,
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, chat.Entity.Name);
+            await Clients.Group(chat.Entity.Name).SendAsync(SignalRClientMethods.StatusChanged,
                 new UserStatusContext { Status = UserOnlineStatus.Offline, UserId = _user.Id });
         }
 
@@ -76,7 +76,7 @@ public class ChatHub : Hub
         return user;
     }
 
-    private async Task<IEnumerable<Domain.Models.Chat>> GetChatsForUserAsync()
+    private async Task<IEnumerable<ChatResult>> GetChatsForUserAsync()
     {
         return await _chatService.GetChatsForUserAsync(_user.Email);
     }

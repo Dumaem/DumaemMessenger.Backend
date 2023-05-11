@@ -25,12 +25,12 @@ public class ChatController : ControllerBase
         BaseResult result;
         if (!credentials.IsPersonal)
         {
-            result = await _chatService.CreateChatAsync(credentials.Participants, credentials.GroupName!);
+            result = await _chatService.CreateChatAsync(credentials.ParticipantsIds, credentials.GroupName!);
         }
         else
         {
-            result = await _chatService.CreatePersonalChatAsync(credentials.Participants.Last(),
-                credentials.CurrentUser!);
+            result = await _chatService.CreatePersonalChatAsync(credentials.ParticipantsIds.Last(),
+                credentials.CurrentUserId);
         }
         if (!result.Success)
             return BadRequest(result.Message);
@@ -44,7 +44,7 @@ public class ChatController : ControllerBase
         var result = await _chatService.GetChatByNameAsync(name);
         if (!result.Success)
             return BadRequest(result.Message);
-        return Ok(result.Chat);
+        return Ok(result.Entity);
     }
 
     [HttpGet]

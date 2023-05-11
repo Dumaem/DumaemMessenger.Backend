@@ -6,6 +6,7 @@ using Messenger.Database.Write;
 using Messenger.Domain.Models;
 using Messenger.Domain.Repositories;
 using Messenger.Domain.Results;
+using Microsoft.EntityFrameworkCore;
 
 namespace Messenger.Database.Repositories;
 
@@ -20,7 +21,7 @@ public class ChatRepository : IChatRepository
         _readonlyContext = readonlyContext;
     }
 
-    public async Task<DatabaseCreateResult> CreateChatAsync(IEnumerable<User> participants, bool isPersonal,
+    public async Task<DatabaseCreateResult> CreateChatAsync(IEnumerable<int> participants, bool isPersonal,
         string? groupName)
     {
         var chat = new ChatDb
@@ -30,11 +31,11 @@ public class ChatRepository : IChatRepository
             IsPersonal = isPersonal,
         };
 
-        foreach (var user in participants)
+        foreach (var userId in participants)
         {
             _context.UserChats.Add(new UserChatDb
             {
-                Chat = chat, UserId = user.Id
+                Chat = chat, UserId = userId
             });
         }
 
@@ -42,15 +43,36 @@ public class ChatRepository : IChatRepository
         return new DatabaseCreateResult {Success = true, ObjectId = chat.Id, Message = chat.Name};
     }
 
-    public async Task<IEnumerable<Chat>> GetChatsForUserAsync(string email)
+    public async Task<IEnumerable<ChatResult>> GetChatsForUserAsync(string email)
     {
-        var chats = await _readonlyContext.Connection
-            .QueryAsync<ChatDb>(ChatRepositoryQueries.GetChatsForUserAsync, new {email});
-
-        return chats.Select(x => new Chat
+        var user = _context.Users.First(x => x.Email == email);
+        var userChatIds = _context.UserChats.Where(x => x.UserId == user.Id)
+            .Select(x => x.ChatId);
+        var userChats = _context.Chats.Include(x => x.Users)
+            .Include(x => x.Messages)
+            .Where(x => userChatIds.Contains(x.Id));
+        var res = new List<ChatResult>();
+        foreach (var s in userChats)
         {
-            Id = x.Id, Name = x.Name
-        });
+            var lastMessage = s.Messages.Last();
+            var chat = new ChatResult
+            {
+                ChatId = s.Id,
+                ChatName = s.GroupName!,
+                LastMessage = new Message
+                {
+                    Id = lastMessage.Id,
+                    DateOfDispatch = lastMessage.DateOfDispatch,
+                    IsEdited = lastMessage.IsEdited,
+                    IsDeleted = lastMessage.IsDeleted,
+                    SenderId = lastMessage.SenderId,
+                    ChatId = lastMessage.ChatId,
+                    RepliedMessageId = lastMessage.RepliedMessageId,
+                    ForwardedMessageId = lastMessage.ForwardedMessageId,
+                    Content = lastMessage.MessageContents
+                },
+            };
+        }
     }
 
     public async Task<IEnumerable<User>> GetChatParticipantsAsync(string chatName)

@@ -8,24 +8,31 @@ namespace Messenger.Domain.Services.Impl;
 public class ChatService : IChatService
 {
     private readonly IChatRepository _repository;
+    private readonly IUserRepository _userRepository;
 
-    public ChatService(IChatRepository repository)
+    public ChatService(IChatRepository repository, IUserRepository userRepository)
     {
         _repository = repository;
+        _userRepository = userRepository;
     }
 
-    public async Task<BaseResult> CreateChatAsync(IEnumerable<User> participants, string groupName)
+    public async Task<BaseResult> CreateChatAsync(IEnumerable<int> participants, string groupName)
     {
         return await _repository.CreateChatAsync(participants, false, groupName);
     }
 
-    public async Task<BaseResult> CreatePersonalChatAsync(User participant, User currentUser)
+    public async Task<BaseResult> CreatePersonalChatAsync(int participantId, int currentUserId)
     {
-        var participants = new List<User>{participant,currentUser};
-        return await _repository.CreateChatAsync(participants, true, null);
+        var participants = new List<int>{participantId,currentUserId};
+        var participant = await _userRepository.GetUserByIdAsync(participantId);
+        if (participant is null)
+        {
+            return new BaseResult { Success = false, Message = UserErrorMessage.NotExistUser};
+        }
+        return await _repository.CreateChatAsync(participants, true, participant.Name);
     }
 
-    public async Task<IEnumerable<Chat>> GetChatsForUserAsync(string email)
+    public async Task<IEnumerable<ChatResult>> GetChatsForUserAsync(string email)
     {
         return await _repository.GetChatsForUserAsync(email);
     }
@@ -35,12 +42,12 @@ public class ChatService : IChatService
         return await _repository.GetChatParticipantsAsync(chatName);
     }
 
-    public async Task<ChatResult> GetChatByNameAsync(string name)
+    public async Task<EntityResult<Chat>> GetChatByNameAsync(string name)
     {
         var res = await _repository.GetChatByName(name);
         return res is null ? 
-            new ChatResult{Message = string.Format(ChatErrorMessages.ChatWithNameNotFound, name)} 
-            : new ChatResult{Chat = res, Success = true};
+            new EntityResult<Chat>{Message = string.Format(ChatErrorMessages.ChatWithNameNotFound, name)} 
+            : new EntityResult<Chat>{Entity = res, Success = true};
     }
 
     public async Task<bool> IsChatExistsAsync(string chatId)

@@ -4,5 +4,7 @@ namespace Messenger.Domain.Results;
 
 public class ChatResult : BaseResult
 {
-    public Chat Chat { get; set; } = null!;
+    public int ChatId { get; set; }
+    public string ChatName { get; set; } = null!;
+    public Message? LastMessage { get; set; }
 }

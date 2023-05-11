@@ -4,8 +4,8 @@ namespace Messenger.WebAPI.Credentials;
 
 public class ChatCreateCredentials
 {
-    public IEnumerable<User> Participants { get; set; } = null!;
+    public IEnumerable<int> ParticipantsIds { get; set; } = null!;
     public bool IsPersonal { get; set; }
-    public User? CurrentUser { get; set; }
+    public int CurrentUserId { get; set; }
     public string? GroupName { get; set; }
 }
