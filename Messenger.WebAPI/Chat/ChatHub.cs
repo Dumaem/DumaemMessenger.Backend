@@ -3,7 +3,6 @@ using Messenger.Domain.Exception;
 using Messenger.Domain.Models;
 using Messenger.Domain.Results;
 using Messenger.Domain.Services;
-using Messenger.WebAPI.Shared;
 using Messenger.WebAPI.Shared.Client;
 using Messenger.WebAPI.Shared.SharedModels;
 using Microsoft.AspNetCore.Authorization;

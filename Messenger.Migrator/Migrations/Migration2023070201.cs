@@ -1,6 +1,4 @@
-﻿using FluentMigrator;
-
-namespace Messenger.Migrator.Migrations
+﻿namespace Messenger.Migrator.Migrations
 {
     [Migration(2023070201)]
     public class Migration2023070201 : MessengerMigration

@@ -1,6 +1,4 @@
-﻿using Messenger.Domain.Models;
-
-namespace Messenger.Domain.Services
+﻿namespace Messenger.Domain.Services
 {
     public interface IMessageService
     {

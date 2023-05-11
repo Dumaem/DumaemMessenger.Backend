@@ -2,8 +2,8 @@
 
 public class RefreshTokenErrorMessages
 {
-    public const string InvalidToken = "Invalid token";
-    public const string UnrecognizedToken = "Token is unrecognized";
-    public const string UsedToken = "Token is already used";
-    public const string ExpiredToken = "Token is Expired";
+    public const string InvalidToken = "Неверный токен";
+    public const string UnrecognizedToken = "Нераспознанный токен";
+    public const string UsedToken = "Данный токен уже был использован";
+    public const string ExpiredToken = "Токен истек";
 }

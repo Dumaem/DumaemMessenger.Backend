@@ -20,11 +20,14 @@ public class ChatRepository : IChatRepository
         _readonlyContext = readonlyContext;
     }
 
-    public async Task<DatabaseCreateResult> CreateChatAsync(IEnumerable<User> participants)
+    public async Task<DatabaseCreateResult> CreateChatAsync(IEnumerable<User> participants, bool isPersonal,
+        string? groupName)
     {
         var chat = new ChatDb
         {
-            Name = Guid.NewGuid().ToString()
+            Name = Guid.NewGuid().ToString(),
+            GroupName = groupName,
+            IsPersonal = isPersonal,
         };
 
         foreach (var user in participants)
@@ -61,6 +64,19 @@ public class ChatRepository : IChatRepository
         });
     }
 
+    public async Task<Chat?> GetChatByName(string name)
+    {
+        var res = await _readonlyContext.Connection.QuerySingleOrDefaultAsync<ChatDb>(
+            ChatRepositoryQueries.GetChatByName,
+            new {name});
+        return res is null
+            ? null
+            : new Chat
+            {
+                Id = res.Id, Name = res.Name, IsPersonal = res.IsPersonal
+            };
+    }
+
     public async Task<bool> IsChatExistsAsync(string chatId)
     {
         return await _readonlyContext.Connection.ExecuteScalarAsync<bool>(ChatRepositoryQueries.IsChatExists,
@@ -76,6 +92,6 @@ public class ChatRepository : IChatRepository
         });
         await _context.SaveChangesAsync();
 
-        return new BaseResult { Success = true};
+        return new BaseResult {Success = true};
     }
 }

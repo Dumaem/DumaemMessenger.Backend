@@ -19,7 +19,6 @@ public class AuthorizationController : ControllerBase
         _authorizationService = authorizationService;
     }
 
-
     [HttpPost]
     [Route("register")]
     public async Task<IActionResult> Register([FromBody] RegistrationCredentials credentials)
