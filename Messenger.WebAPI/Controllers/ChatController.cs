@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Messenger.WebAPI.Controllers;
 
+[ApiController]
+[Route("/api/[controller]")]
 public class ChatController : ControllerBase
 {
     private readonly IChatService _chatService;
