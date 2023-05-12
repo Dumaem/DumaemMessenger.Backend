@@ -2,18 +2,6 @@
 
 internal static class ChatRepositoryQueries
 {
-    internal const string GetChatsForUserAsync = $@"SELECT c.id, 
-                                                           c.name,
-                                                           m.*
-                                                    FROM public.chat c 
-                                                        JOIN public.user_chat uc 
-                                                            ON uc.chat_id = c.id 
-                                                        JOIN public.user u
-                                                            ON u.id = uc.user_id
-                                                        JOIN public.message m 
-                                                            ON m.chat_id = c.chat_id
-                                                    WHERE u.email = @email";
-
     internal const string GetChatParticipants = $@"SELECT u.id,
                                                           u.username,
                                                           u.name, 

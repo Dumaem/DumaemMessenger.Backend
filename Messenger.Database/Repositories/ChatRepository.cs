@@ -60,38 +60,29 @@ public class ChatRepository : IChatRepository
         foreach (var c in userChats)
         {
             var lastMessage = c.Messages.LastOrDefault();
-            res.Add(lastMessage is null
-                ? new ChatResult
+            if (lastMessage is null)
+            {
+                res.Add(new ChatResult
                 {
                     Success = true,
                     ChatId = c.Id,
                     ChatName = c.GroupName!,
                     LastMessage = null
-                }
-                : new ChatResult
+                });
+            }
+
+            else
+            {
+                var convertedLastMessage = EntityConverter.ConvertMessage(lastMessage);
+                convertedLastMessage.Content = EntityConverter.ConvertMessageContent(lastMessage.MessageContent);
+                res.Add(new ChatResult
                 {
                     Success = true,
                     ChatId = c.Id,
                     ChatName = c.GroupName!,
-                    LastMessage = new Message
-                    {
-                        Id = lastMessage.Id,
-                        DateOfDispatch = lastMessage.DateOfDispatch,
-                        IsEdited = lastMessage.IsEdited,
-                        IsDeleted = lastMessage.IsDeleted,
-                        SenderId = lastMessage.SenderId,
-                        ChatId = lastMessage.ChatId,
-                        RepliedMessageId = lastMessage.RepliedMessageId,
-                        ForwardedMessageId = lastMessage.ForwardedMessageId,
-                        Content = new MessageContent
-                        {
-                            Id = lastMessage.MessageContent.Id,
-                            Content = lastMessage.MessageContent.Content,
-                            TypeId = lastMessage.MessageContent.TypeId,
-                            MessageId = lastMessage.MessageContent.MessageId
-                        }
-                    },
+                    LastMessage = convertedLastMessage,
                 });
+            }
         }
 
         return Task.FromResult<IEnumerable<ChatResult>>(res);

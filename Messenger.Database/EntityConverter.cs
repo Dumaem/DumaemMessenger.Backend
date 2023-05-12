@@ -26,4 +26,30 @@ public static class EntityConverter
             return message;
         });
     }
+
+    public static Message ConvertMessage(MessageDb messageDb)
+    {
+        return new Message
+        {
+            Id = messageDb.Id,
+            DateOfDispatch = messageDb.DateOfDispatch,
+            IsEdited = messageDb.IsEdited,
+            IsDeleted = messageDb.IsDeleted,
+            SenderId = messageDb.SenderId,
+            ChatId = messageDb.ChatId,
+            RepliedMessageId = messageDb.RepliedMessageId,
+            ForwardedMessageId = messageDb.ForwardedMessageId,
+        };
+    }
+
+    public static MessageContent ConvertMessageContent(MessageContentDb messageContentDb)
+    {
+        return new MessageContent
+        {
+            Id = messageContentDb.Id,
+            Content = messageContentDb.Content,
+            TypeId = messageContentDb.TypeId,
+            MessageId = messageContentDb.MessageId
+        };
+    }
 }
