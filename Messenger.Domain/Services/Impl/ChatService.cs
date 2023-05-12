@@ -46,6 +46,14 @@ public class ChatService : IChatService
             : new EntityResult<Chat>{Entity = res, Success = true};
     }
 
+    public async Task<EntityResult<Chat>> GetChatByIdAsync(int id)
+    {
+        var res = await _repository.GetChatById(id);
+        return res is null ? 
+            new EntityResult<Chat>{Message = string.Format(ChatErrorMessages.ChatWithNameNotFound, id)} 
+            : new EntityResult<Chat>{Entity = res, Success = true};
+    }
+
     public async Task<bool> IsChatExistsAsync(string chatId)
     {
         return await _repository.IsChatExistsAsync(chatId);

@@ -117,7 +117,20 @@ public class ChatRepository : IChatRepository
             ? null
             : new Chat
             {
-                Id = res.Id, Name = res.Name, IsPersonal = res.IsPersonal
+                Id = res.Id, Name = res.Name, IsPersonal = res.IsPersonal, GroupName = res.GroupName
+            };
+    }
+
+    public async Task<Chat?> GetChatById(int id)
+    {
+        var res = await _readonlyContext.Connection.QuerySingleOrDefaultAsync<ChatDb>(
+            ChatRepositoryQueries.GetChatById,
+            new {id});
+        return res is null
+            ? null
+            : new Chat
+            {
+                Id = res.Id, Name = res.Name, IsPersonal = res.IsPersonal, GroupName = res.GroupName
             };
     }
 

@@ -49,6 +49,16 @@ public class ChatController : ControllerBase
     }
 
     [HttpGet]
+    [Route("get-chat-by-id")]
+    public async Task<IActionResult> GetChatById([FromQuery] int id)
+    {
+        var result = await _chatService.GetChatByIdAsync(id);
+        if (!result.Success)
+            return BadRequest(result.Message);
+        return Ok(result.Entity);
+    }
+
+    [HttpGet]
     [Route("get-chat-members")]
     public async Task<IActionResult> GetChatMembers([FromQuery] string name)
     {
@@ -60,7 +70,7 @@ public class ChatController : ControllerBase
     
     [HttpGet]
     [Route("get-user-chats")]
-    public async Task<IActionResult> GetUser([FromQuery] string email)
+    public async Task<IActionResult> GetUserChats([FromQuery] string email)
     {
         var result = await _chatService.GetChatsForUserAsync(email);
         if(!result.Any())
@@ -70,7 +80,7 @@ public class ChatController : ControllerBase
     
     [HttpPost]
     [Route("add-member-to-chat")]
-    public async Task<IActionResult> GetUser([FromBody] int chatId, int userId)
+    public async Task<IActionResult> AddMemberToChat([FromQuery] int chatId, [FromQuery] int userId)
     {
         var result = await _chatService.AddMemberToChatAsync(chatId, userId);
         if(!result.Success)
