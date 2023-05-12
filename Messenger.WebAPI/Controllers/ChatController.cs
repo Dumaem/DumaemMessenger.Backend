@@ -40,9 +40,9 @@ public class ChatController : ControllerBase
 
     [HttpGet]
     [Route("get-chat-by-name")]
-    public async Task<IActionResult> GetChatByName([FromQuery] string name)
+    public async Task<IActionResult> GetChat([FromQuery] string name, [FromQuery] int currentUserId)
     {
-        var result = await _chatService.GetChatByNameAsync(name);
+        var result = await _chatService.GetChatAsync(name, currentUserId);
         if (!result.Success)
             return BadRequest(result.Message);
         return Ok(result.Entity);
@@ -50,16 +50,16 @@ public class ChatController : ControllerBase
 
     [HttpGet]
     [Route("get-chat-by-id")]
-    public async Task<IActionResult> GetChatById([FromQuery] int id)
+    public async Task<IActionResult> GetChat([FromQuery] int id, [FromQuery] int currentUserId)
     {
-        var result = await _chatService.GetChatByIdAsync(id);
+        var result = await _chatService.GetChatAsync(id, currentUserId);
         if (!result.Success)
             return BadRequest(result.Message);
         return Ok(result.Entity);
     }
 
     [HttpGet]
-    [Route("get-chat-members")]
+    [Route("get-chat-members-by-name")]
     public async Task<IActionResult> GetChatMembers([FromQuery] string name)
     {
         var result = await _chatService.GetChatParticipantsAsync(name);
@@ -69,10 +69,30 @@ public class ChatController : ControllerBase
     }
     
     [HttpGet]
-    [Route("get-user-chats")]
+    [Route("get-chat-members-by-id")]
+    public async Task<IActionResult> GetChatMembers([FromQuery] int id)
+    {
+        var result = await _chatService.GetChatParticipantsAsync(id);
+        if(!result.Any())
+            return BadRequest();
+        return Ok(result);
+    }
+    
+    [HttpGet]
+    [Route("get-user-chats-by-email")]
     public async Task<IActionResult> GetUserChats([FromQuery] string email)
     {
         var result = await _chatService.GetChatsForUserAsync(email);
+        if(!result.Any())
+            return BadRequest();
+        return Ok(result);
+    }
+    
+    [HttpGet]
+    [Route("get-user-chats-by-id")]
+    public async Task<IActionResult> GetUserChats([FromQuery] int id)
+    {
+        var result = await _chatService.GetChatsForUserAsync(id);
         if(!result.Any())
             return BadRequest();
         return Ok(result);
