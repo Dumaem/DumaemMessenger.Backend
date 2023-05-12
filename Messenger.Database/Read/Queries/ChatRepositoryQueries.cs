@@ -2,15 +2,6 @@
 
 internal static class ChatRepositoryQueries
 {
-    internal const string GetChatsForUserAsync = $@"SELECT c.id, 
-                                                           c.name
-                                                    FROM public.chat c 
-                                                        JOIN public.user_chat uc 
-                                                            ON uc.chat_id = c.id 
-                                                        JOIN public.user u
-                                                            ON u.id = uc.user_id
-                                                    WHERE u.email = @email";
-
     internal const string GetChatParticipants = $@"SELECT u.id,
                                                           u.username,
                                                           u.name, 
@@ -24,4 +15,5 @@ internal static class ChatRepositoryQueries
 
     internal const string IsChatExists = $@"SELECT EXISTS(SELECT FROM public.chat c WHERE name=@chatId)";
     internal const string GetChatByName = $@"SELECT * FROM chat WHERE name = @name";
+    internal const string GetChatById = $@"SELECT * FROM chat WHERE id = @id";
 }

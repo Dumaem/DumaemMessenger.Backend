@@ -25,12 +25,13 @@ public class ChatController : ControllerBase
         BaseResult result;
         if (!credentials.IsPersonal)
         {
-            result = await _chatService.CreateChatAsync(credentials.Participants, credentials.GroupName!);
+            result = await _chatService.CreateChatAsync(credentials.ParticipantsIds, credentials.GroupName!,
+                credentials.CurrentUserId);
         }
         else
         {
-            result = await _chatService.CreatePersonalChatAsync(credentials.Participants.Last(),
-                credentials.CurrentUser!);
+            result = await _chatService.CreatePersonalChatAsync(credentials.ParticipantsIds.Last(),
+                credentials.CurrentUserId);
         }
         if (!result.Success)
             return BadRequest(result.Message);
@@ -44,7 +45,17 @@ public class ChatController : ControllerBase
         var result = await _chatService.GetChatByNameAsync(name);
         if (!result.Success)
             return BadRequest(result.Message);
-        return Ok(result.Chat);
+        return Ok(result.Entity);
+    }
+
+    [HttpGet]
+    [Route("get-chat-by-id")]
+    public async Task<IActionResult> GetChatById([FromQuery] int id)
+    {
+        var result = await _chatService.GetChatByIdAsync(id);
+        if (!result.Success)
+            return BadRequest(result.Message);
+        return Ok(result.Entity);
     }
 
     [HttpGet]
@@ -59,7 +70,7 @@ public class ChatController : ControllerBase
     
     [HttpGet]
     [Route("get-user-chats")]
-    public async Task<IActionResult> GetUser([FromQuery] string email)
+    public async Task<IActionResult> GetUserChats([FromQuery] string email)
     {
         var result = await _chatService.GetChatsForUserAsync(email);
         if(!result.Any())
@@ -69,7 +80,7 @@ public class ChatController : ControllerBase
     
     [HttpPost]
     [Route("add-member-to-chat")]
-    public async Task<IActionResult> GetUser([FromBody] int chatId, int userId)
+    public async Task<IActionResult> AddMemberToChat([FromQuery] int chatId, [FromQuery] int userId)
     {
         var result = await _chatService.AddMemberToChatAsync(chatId, userId);
         if(!result.Success)

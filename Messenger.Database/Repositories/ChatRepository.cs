@@ -6,6 +6,7 @@ using Messenger.Database.Write;
 using Messenger.Domain.Models;
 using Messenger.Domain.Repositories;
 using Messenger.Domain.Results;
+using Microsoft.EntityFrameworkCore;
 
 namespace Messenger.Database.Repositories;
 
@@ -20,8 +21,8 @@ public class ChatRepository : IChatRepository
         _readonlyContext = readonlyContext;
     }
 
-    public async Task<DatabaseCreateResult> CreateChatAsync(IEnumerable<User> participants, bool isPersonal,
-        string? groupName)
+    public async Task<DatabaseCreateResult> CreateChatAsync(IEnumerable<int> participants, bool isPersonal,
+        string? groupName, int currentUserId)
     {
         var chat = new ChatDb
         {
@@ -30,27 +31,61 @@ public class ChatRepository : IChatRepository
             IsPersonal = isPersonal,
         };
 
-        foreach (var user in participants)
+        foreach (var userId in participants)
         {
             _context.UserChats.Add(new UserChatDb
             {
-                Chat = chat, UserId = user.Id
+                Chat = chat, UserId = userId
             });
         }
+
+        _context.UserChats.Add(new UserChatDb
+        {
+            Chat = chat, UserId = currentUserId 
+        });
 
         await _context.SaveChangesAsync();
         return new DatabaseCreateResult {Success = true, ObjectId = chat.Id, Message = chat.Name};
     }
 
-    public async Task<IEnumerable<Chat>> GetChatsForUserAsync(string email)
+    public Task<IEnumerable<ChatResult>> GetChatsForUserAsync(string email)
     {
-        var chats = await _readonlyContext.Connection
-            .QueryAsync<ChatDb>(ChatRepositoryQueries.GetChatsForUserAsync, new {email});
-
-        return chats.Select(x => new Chat
+        var user = _context.Users.First(x => x.Email == email);
+        var userChatIds = _context.UserChats.Where(x => x.UserId == user.Id)
+            .Select(x => x.ChatId);
+        var userChats = _context.Chats.Include(x => x.Users)
+            .Include(x => x.Messages).ThenInclude(x=>x.MessageContent)
+            .Where(x => userChatIds.Contains(x.Id));
+        var res = new List<ChatResult>();
+        foreach (var c in userChats)
         {
-            Id = x.Id, Name = x.Name
-        });
+            var lastMessage = c.Messages.LastOrDefault();
+            if (lastMessage is null)
+            {
+                res.Add(new ChatResult
+                {
+                    Success = true,
+                    ChatId = c.Id,
+                    ChatName = c.GroupName!,
+                    LastMessage = null
+                });
+            }
+
+            else
+            {
+                var convertedLastMessage = EntityConverter.ConvertMessage(lastMessage);
+                convertedLastMessage.Content = EntityConverter.ConvertMessageContent(lastMessage.MessageContent);
+                res.Add(new ChatResult
+                {
+                    Success = true,
+                    ChatId = c.Id,
+                    ChatName = c.GroupName!,
+                    LastMessage = convertedLastMessage,
+                });
+            }
+        }
+
+        return Task.FromResult<IEnumerable<ChatResult>>(res);
     }
 
     public async Task<IEnumerable<User>> GetChatParticipantsAsync(string chatName)
@@ -73,7 +108,20 @@ public class ChatRepository : IChatRepository
             ? null
             : new Chat
             {
-                Id = res.Id, Name = res.Name, IsPersonal = res.IsPersonal
+                Id = res.Id, Name = res.Name, IsPersonal = res.IsPersonal, GroupName = res.GroupName
+            };
+    }
+
+    public async Task<Chat?> GetChatById(int id)
+    {
+        var res = await _readonlyContext.Connection.QuerySingleOrDefaultAsync<ChatDb>(
+            ChatRepositoryQueries.GetChatById,
+            new {id});
+        return res is null
+            ? null
+            : new Chat
+            {
+                Id = res.Id, Name = res.Name, IsPersonal = res.IsPersonal, GroupName = res.GroupName
             };
     }
 

@@ -4,7 +4,7 @@ public class MessageContentDb
 {
     public long Id { get; set; }
 
-    public byte[] Content { get; set; } = null!;
+    public string Content { get; set; } = null!;
 
     public long MessageId { get; set; }
 

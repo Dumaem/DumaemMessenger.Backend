@@ -28,7 +28,7 @@ public class MessageDb
 
     public virtual ICollection<MessageDb> InverseRepliedMessage { get; } = new List<MessageDb>();
 
-    public virtual ICollection<MessageContentDb> MessageContents { get; } = new List<MessageContentDb>();
+    public virtual MessageContentDb MessageContent { get; } = null!;
 
     public virtual ICollection<ReadMessageDb> ReadMessages { get; } = new List<ReadMessageDb>();
 

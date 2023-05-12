@@ -2,7 +2,7 @@
 using Messenger.Domain.Results;
 using Messenger.WebAPI.Shared.SharedModels;
 
-namespace Messenger.WebAPI.Shared.Client;
+namespace Messenger.WebAPI.Shared.SignalR;
 
 public static class SignalRClientMethods
 {

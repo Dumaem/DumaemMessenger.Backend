@@ -8,24 +8,27 @@ namespace Messenger.Domain.Services.Impl;
 public class ChatService : IChatService
 {
     private readonly IChatRepository _repository;
+    private readonly IUserRepository _userRepository;
 
-    public ChatService(IChatRepository repository)
+    public ChatService(IChatRepository repository, IUserRepository userRepository)
     {
         _repository = repository;
+        _userRepository = userRepository;
     }
 
-    public async Task<BaseResult> CreateChatAsync(IEnumerable<User> participants, string groupName)
+    public async Task<BaseResult> CreateChatAsync(IEnumerable<int> participants, string groupName,
+        int currentUserId)
     {
-        return await _repository.CreateChatAsync(participants, false, groupName);
+        return await _repository.CreateChatAsync(participants, false, groupName, currentUserId);
     }
 
-    public async Task<BaseResult> CreatePersonalChatAsync(User participant, User currentUser)
+    public async Task<BaseResult> CreatePersonalChatAsync(int participantId, int currentUserId)
     {
-        var participants = new List<User>{participant,currentUser};
-        return await _repository.CreateChatAsync(participants, true, null);
+        var participants = new List<int>{participantId};
+        return await _repository.CreateChatAsync(participants, true, null, currentUserId);
     }
 
-    public async Task<IEnumerable<Chat>> GetChatsForUserAsync(string email)
+    public async Task<IEnumerable<ChatResult>> GetChatsForUserAsync(string email)
     {
         return await _repository.GetChatsForUserAsync(email);
     }
@@ -35,12 +38,20 @@ public class ChatService : IChatService
         return await _repository.GetChatParticipantsAsync(chatName);
     }
 
-    public async Task<ChatResult> GetChatByNameAsync(string name)
+    public async Task<EntityResult<Chat>> GetChatByNameAsync(string name)
     {
         var res = await _repository.GetChatByName(name);
         return res is null ? 
-            new ChatResult{Message = string.Format(ChatErrorMessages.ChatWithNameNotFound, name)} 
-            : new ChatResult{Chat = res, Success = true};
+            new EntityResult<Chat>{Message = string.Format(ChatErrorMessages.ChatWithNameNotFound, name)} 
+            : new EntityResult<Chat>{Entity = res, Success = true};
+    }
+
+    public async Task<EntityResult<Chat>> GetChatByIdAsync(int id)
+    {
+        var res = await _repository.GetChatById(id);
+        return res is null ? 
+            new EntityResult<Chat>{Message = string.Format(ChatErrorMessages.ChatWithNameNotFound, id)} 
+            : new EntityResult<Chat>{Entity = res, Success = true};
     }
 
     public async Task<bool> IsChatExistsAsync(string chatId)
