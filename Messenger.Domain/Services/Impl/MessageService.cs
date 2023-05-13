@@ -74,37 +74,4 @@ public class MessageService : IMessageService
     {
         return await _messageRepository.GetShortMessagePreview(messageId);
     }
-
-    // public async Task SendMessageAsync(int chatId, int userId, byte[] content, int messageTypeId)
-    // {
-    //     // Use the repository to persist the message to the data store
-    //
-    //     var message = new Message
-    //     {
-    //         ChatId = chatId,
-    //         SenderId = userId,
-    //         Content = new MessageContent { Content = content, TypeId = messageTypeId },
-    //         DateOfDispatch = DateTime.UtcNow
-    //     };
-    //     message.Content.MessageId = message.Id;
-    //     await _messageRepository.CreateMessageAsync(message);
-    // }
-    //
-    //
-    //     // Use the repository to delete the message for one user
-    //     await _messageRepository.DeleteMessageForUserAsync(messageId, (int)userId);
-    // }
-    //
-    // public async Task ReadMessageAsync(long messageId, int userId)
-    // {
-    //     // Use the repository to mark the message as read
-    //     await _messageRepository.CreateReadMessage(messageId, userId);
-    // }
-    // public async Task EditMessageAsync(long messageId, byte[] content, int messageTypeId)
-    // {
-    //     var message = await _messageRepository.GetMessageByIdAsync(messageId);
-    //     // Use the repository to update the message's content
-    //     message.Content = new MessageContent { Content = content, TypeId = messageTypeId };
-    //     await _messageRepository.EditMessageByIdAsync(messageId, message);
-    // }
 }
