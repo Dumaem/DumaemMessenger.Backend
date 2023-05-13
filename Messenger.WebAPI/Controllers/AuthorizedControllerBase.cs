@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace Messenger.WebAPI.Controllers;
 
 [Authorize]
+[ApiController]
+[Route("/api/[controller]")]
 public class AuthorizedControllerBase : ControllerBase
 {
     protected UserHttpClaims ParseHttpClaims()

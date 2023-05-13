@@ -1,13 +1,12 @@
 ﻿using Messenger.Domain.Results;
 using Messenger.Domain.Services;
 using Messenger.WebAPI.Credentials;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Messenger.WebAPI.Controllers;
 
-[ApiController]
-[Route("/api/[controller]")]
-public class ChatController : ControllerBase
+public class ChatController : AuthorizedControllerBase
 {
     private readonly IChatService _chatService;
     private readonly ILogger<ChatController> _logger;
@@ -22,16 +21,15 @@ public class ChatController : ControllerBase
     [Route("create-chat")]
     public async Task<IActionResult> CreateChat([FromBody] ChatCreateCredentials credentials)
     {
+        var userId = ParseHttpClaims().Id;
         BaseResult result;
         if (!credentials.IsPersonal)
         {
-            result = await _chatService.CreateChatAsync(credentials.ParticipantsIds, credentials.GroupName!,
-                credentials.CurrentUserId);
+            result = await _chatService.CreateChatAsync(credentials.ParticipantsIds, credentials.GroupName!, userId);
         }
         else
         {
-            result = await _chatService.CreatePersonalChatAsync(credentials.ParticipantsIds.Last(),
-                credentials.CurrentUserId);
+            result = await _chatService.CreatePersonalChatAsync(credentials.ParticipantsIds.Last(),userId);
         }
         if (!result.Success)
             return BadRequest(result.Message);
@@ -40,9 +38,9 @@ public class ChatController : ControllerBase
 
     [HttpGet]
     [Route("get-chat-by-name")]
-    public async Task<IActionResult> GetChat([FromQuery] string name, [FromQuery] int currentUserId)
+    public async Task<IActionResult> GetChat([FromQuery] string name)
     {
-        var result = await _chatService.GetChatAsync(name, currentUserId);
+        var result = await _chatService.GetChatAsync(name, ParseHttpClaims().Id);
         if (!result.Success)
             return BadRequest(result.Message);
         return Ok(result.Entity);
@@ -50,9 +48,9 @@ public class ChatController : ControllerBase
 
     [HttpGet]
     [Route("get-chat-by-id")]
-    public async Task<IActionResult> GetChat([FromQuery] int id, [FromQuery] int currentUserId)
+    public async Task<IActionResult> GetChat([FromQuery] int id)
     {
-        var result = await _chatService.GetChatAsync(id, currentUserId);
+        var result = await _chatService.GetChatAsync(id, ParseHttpClaims().Id);
         if (!result.Success)
             return BadRequest(result.Message);
         return Ok(result.Entity);

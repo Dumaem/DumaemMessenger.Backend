@@ -59,8 +59,11 @@ public class ChatRepository : IChatRepository
     {
         var userChatIds = _context.UserChats.Where(x => x.UserId == id)
             .Select(x => x.ChatId);
-        var userChats = _context.Chats.Include(x => x.Users)
-            .Include(x => x.Messages).ThenInclude(x=>x.MessageContent)
+        var userChats = _context.Chats
+            .Include(x => x.Users)
+            .Include(x => x.Messages.Where(a => !a.IsDeleted
+            && a.DeletedMessages.All(y => y.UserId != id)))
+            .ThenInclude(x=>x.MessageContent)
             .Where(x => userChatIds.Contains(x.Id));
         var res = new List<ChatResult>();
         foreach (var c in userChats)

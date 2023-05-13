@@ -4,8 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Messenger.WebAPI.Controllers;
 
-[ApiController]
-[Route("/api/[controller]")]
 public class MessageController : AuthorizedControllerBase
 {
     private readonly IMessageService _messageService;
@@ -16,7 +14,7 @@ public class MessageController : AuthorizedControllerBase
     }
 
     [HttpGet]
-    [Route("/list")]
+    [Route("list")]
     public IActionResult List([FromQuery] int count = 50, [FromQuery] int page = 0)
     {
         var res = _messageService.ListMessagesAsync("testChat1", ParseHttpClaims().Id, 10, 0);
