@@ -6,6 +6,5 @@ public class ChatCreateCredentials
 {
     public IEnumerable<int> ParticipantsIds { get; set; } = null!;
     public bool IsPersonal { get; set; }
-    public int CurrentUserId { get; set; }
     public string? GroupName { get; set; }
 }

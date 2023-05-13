@@ -16,11 +16,11 @@ public class MessageService : IMessageService
         _userRepository = userRepository;
     }
 
-    public async Task<ListDataResult<Message>> ListMessagesAsync(string chatId, int count, int offset)
-    {
-        var res = await _messageRepository.ListMessagesAsync(chatId, count, offset);
-        return res;
-    }
+        public async Task<ListDataResult<Message>> ListMessagesAsync(string chatId, int userId, int count, int offset)
+        {
+            var res = await _messageRepository.ListMessagesAsync(chatId, userId, count, offset);
+            return res;
+        }
 
     public async Task<EntityResult<Message>> SaveMessageAsync(Message message, string chatId,
         SendMessageOptions[] options)

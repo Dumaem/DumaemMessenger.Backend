@@ -24,28 +24,29 @@ public class MessageRepository : IMessageRepository
         _readonlyContext = readonlyContext;
     }
 
-    public async Task<ListDataResult<Message>> ListMessagesAsync(string chatId, int count, int offset)
-    {
-        var chat = await _context.Chats.FirstOrDefaultAsync(x => x.Name == chatId) ?? throw new NotFoundException();
-        var messages = _context.Messages
-            .Include(x => x.MessageContent)
-            .Where(x => x.ChatId == chat.Id)
-            .OrderByDescending(x => x.DateOfDispatch)
-            .Skip(offset)
-            .Take(count);
-        return new ListDataResult<Message>
+        public async Task<ListDataResult<Message>> ListMessagesAsync(string chatId, int userId, int count, int offset)
         {
-            Success = true, Items = EntityConverter.ConvertMessages(messages),
-            TotalItemsCount = _context.Messages.Count()
-        };
-    }
-
-    public async Task<string> GetShortMessagePreview(long messageId)
-    {
-        return (await _context.Messages
-            .Include(x => x.MessageContent)
-            .FirstAsync(x => x.Id == messageId)).MessageContent.Content[..20];
-    }
+            var chat = await _context.Chats.FirstOrDefaultAsync(x => x.Name == chatId) ?? throw new NotFoundException();
+            var messages = _context.Messages
+                .Include(x => x.MessageContent)
+                .Where(x => x.ChatId == chat.Id && !x.IsDeleted)
+                .Include(x => x.DeletedMessages.Where(z => z.UserId == userId))
+                .OrderByDescending(x => x.DateOfDispatch)
+                .Skip(offset)
+                .Take(count);
+            return new ListDataResult<Message>
+            {
+                Success = true, Items = EntityConverter.ConvertMessages(messages),
+                TotalItemsCount = _context.Messages.Count()
+            };
+        }
+        
+        public async Task<string> GetShortMessagePreview(long messageId)
+        {
+            return (await _context.Messages
+                .Include(x => x.MessageContent)
+                .FirstAsync(x => x.Id == messageId)).MessageContent.Content[..20];
+        }
 
     public async Task<string> GetChatNameFromMessage(long messageId)
     {

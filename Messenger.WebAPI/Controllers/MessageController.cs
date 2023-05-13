@@ -3,10 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Messenger.WebAPI.Controllers;
 
-[ApiController]
-// [Authorize]
-[Route("/api/[controller]")]
-public class MessageController : ControllerBase
+public class MessageController : AuthorizedControllerBase
 {
     private readonly IMessageService _messageService;
 
@@ -16,9 +13,10 @@ public class MessageController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> List([FromQuery] string chatName, [FromQuery] int count = 50, [FromQuery] int page = 0)
+    public async Task<IActionResult> List([FromQuery] string chatName, [FromQuery] int count = 50,
+        [FromQuery] int page = 0)
     {
-        var res = await _messageService.ListMessagesAsync(chatName, count, page * count);
+        var res = _messageService.ListMessagesAsync(chatName, ParseHttpClaims().Id, count, page * count);
         return Ok(res);
     }
 }
