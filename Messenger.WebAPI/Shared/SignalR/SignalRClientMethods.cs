@@ -11,12 +11,18 @@ public static class SignalRClientMethods
     /// </summary>
     /// <remarks>Работает с моделькой <see cref="MessageContext"/></remarks>
     public const string ReceiveMessage = "ReceiveMessage";
-    
+
     /// <summary>
     /// Редактирование существующего сообщения
     /// </summary>
     /// <remarks>Работает с моделькой <see cref="EditMessageContext"/></remarks>
     public const string MessageEdited = "MessageEdited";
+
+    /// <summary>
+    /// Уведомление о том, что пользователь прочитал сообщение
+    /// </summary>
+    /// <remarks>Работает с моделькой <see cref="MessageReadContext"/></remarks>
+    public const string MessageRead = "MessageRead";
 
     /// <summary>
     /// Уведомление о том, что отправленное сообщение не будет доставлено

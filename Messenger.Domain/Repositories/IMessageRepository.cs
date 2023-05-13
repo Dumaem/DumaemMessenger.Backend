@@ -13,4 +13,5 @@ public interface IMessageRepository
     Task DeleteMessageForAllUsers(long deletedMessageId);
     Task CreateReadMessage(long messageId, int userId);
     Task<string> GetShortMessagePreview(long messageId);
+    Task<string> GetChatNameFromMessage(long messageId);
 }

@@ -57,42 +57,6 @@ public class ChatHub : Hub
         await base.OnDisconnectedAsync(exception);
     }
 
-    [HubMethodName(SignalRServerMethods.EditMessage)]
-    public async Task EditMessage(EditMessageContext message)
-    {
-        var user = await GetUserFromContextAsync();
-        if (!await _chatService.IsChatExistsAsync(message.ChatId))
-        {
-            var result = new BaseResult { Success = false, Message = "Passed chat does not exist" };
-            await Clients.Caller.SendAsync(SignalRClientMethods.MessageNotDelivered, result);
-            return;
-        }
-
-        var domainMessage = new Message
-        {
-            Content = new MessageContent { Content = message.Content, TypeId = message.ContentType },
-            SenderId = user.Id, Id = message.MessageId
-        };
-
-        var res = await _messageService.EditMessageAsync(domainMessage);
-        if (!res.Success)
-        {
-            var result = new BaseResult { Success = false, Message = "Error creating a message: " + res.Message };
-            await Clients.Caller.SendAsync(SignalRClientMethods.MessageNotDelivered, result);
-            return;
-        }
-
-        var entity = res.Entity;
-        message = new EditMessageContext
-        {
-            ContentType = entity.Content.TypeId,
-            Content = entity.Content.Content,
-            ChatId = message.ChatId,
-            MessageId = res.Entity.Id,
-        };
-        await Clients.Group(message.ChatId).SendAsync(SignalRClientMethods.MessageEdited, message);
-    }
-
     [HubMethodName(SignalRServerMethods.SendMessage)]
     public async Task SendMessageToChat(MessageContext message, SendMessageOptions[] options)
     {
@@ -131,6 +95,58 @@ public class ChatHub : Hub
             User = user,
         };
         await Clients.Group(message.ChatId).SendAsync(SignalRClientMethods.ReceiveMessage, message);
+    }
+    
+    [HubMethodName(SignalRServerMethods.EditMessage)]
+    public async Task EditMessage(EditMessageContext message)
+    {
+        var user = await GetUserFromContextAsync();
+        if (!await _chatService.IsChatExistsAsync(message.ChatId))
+        {
+            var result = new BaseResult { Success = false, Message = "Passed chat does not exist" };
+            await Clients.Caller.SendAsync(SignalRClientMethods.MessageNotDelivered, result);
+            return;
+        }
+
+        var domainMessage = new Message
+        {
+            Content = new MessageContent { Content = message.Content, TypeId = message.ContentType },
+            SenderId = user.Id, Id = message.MessageId
+        };
+
+        var res = await _messageService.EditMessageAsync(domainMessage);
+        if (!res.Success)
+        {
+            var result = new BaseResult { Success = false, Message = "Error creating a message: " + res.Message };
+            await Clients.Caller.SendAsync(SignalRClientMethods.MessageNotDelivered, result);
+            return;
+        }
+
+        var entity = res.Entity;
+        message = new EditMessageContext
+        {
+            ContentType = entity.Content.TypeId,
+            Content = entity.Content.Content,
+            ChatId = message.ChatId,
+            MessageId = res.Entity.Id,
+        };
+        await Clients.Group(message.ChatId).SendAsync(SignalRClientMethods.MessageEdited, message);
+    }
+    
+    [HubMethodName(SignalRServerMethods.ReadMessage)]
+    public async Task ReadMessage(long messageId)
+    {
+        var user = await GetUserFromContextAsync();
+
+        var res = await _messageService.ReadMessageAsync(messageId, user.Id);
+        if (!res.Success)
+        {
+            return;
+        }
+
+        var chatName = await _messageService.GetChatNameFromMessage(messageId);
+        var context = new MessageReadContext { UserId = user.Id, MessageId = messageId, ChatName = chatName };
+        await Clients.Group(chatName).SendAsync(SignalRClientMethods.MessageRead, context);
     }
 
     private async Task<User> GetUserFromContextAsync()

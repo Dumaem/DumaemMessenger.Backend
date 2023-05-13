@@ -39,12 +39,20 @@ public class MessageRepository : IMessageRepository
             TotalItemsCount = _context.Messages.Count()
         };
     }
-        
+
     public async Task<string> GetShortMessagePreview(long messageId)
     {
         return (await _context.Messages
             .Include(x => x.MessageContent)
             .FirstAsync(x => x.Id == messageId)).MessageContent.Content[..20];
+    }
+
+    public async Task<string> GetChatNameFromMessage(long messageId)
+    {
+        return (await _context.Messages
+                    .Include(x => x.Chat)
+                    .FirstOrDefaultAsync(x => x.Id == messageId) ??
+                throw new NotFoundException()).Chat.Name;
     }
 
     public async Task<long> CreateMessageAsync(Message message, string chatId)

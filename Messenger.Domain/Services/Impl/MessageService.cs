@@ -48,6 +48,17 @@ public class MessageService : IMessageService
             { Success = true, Entity = await _messageRepository.GetMessageByIdAsync(message.Id) };
     }
 
+    public async Task<BaseResult> ReadMessageAsync(long messageId, int userId)
+    {
+        await _messageRepository.CreateReadMessage(messageId, userId);
+        return new BaseResult { Success = true };
+    }
+
+    public async Task<string> GetChatNameFromMessage(long messageId)
+    {
+        return await _messageRepository.GetChatNameFromMessage(messageId);
+    }
+
     public async Task<string> GetShortMessagePreview(long messageId)
     {
         return await _messageRepository.GetShortMessagePreview(messageId);
