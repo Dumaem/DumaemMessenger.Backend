@@ -11,6 +11,12 @@ public static class SignalRClientMethods
     /// </summary>
     /// <remarks>Работает с моделькой <see cref="MessageContext"/></remarks>
     public const string ReceiveMessage = "ReceiveMessage";
+    
+    /// <summary>
+    /// Редактирование существующего сообщения
+    /// </summary>
+    /// <remarks>Работает с моделькой <see cref="EditMessageContext"/></remarks>
+    public const string MessageEdited = "MessageEdited";
 
     /// <summary>
     /// Уведомление о том, что отправленное сообщение не будет доставлено
@@ -34,6 +40,5 @@ public static class SignalRClientMethods
     /// Вызывается при окончании времени действия токена доступа к чату,
     /// означает необходимость получить токе доступа заново
     /// </summary>
-    /// <remarks>Работает с моделькой <see cref="UnauthorizedAccessContext"/></remarks>
     public const string Unauthorized = "Unauthorized";
 }

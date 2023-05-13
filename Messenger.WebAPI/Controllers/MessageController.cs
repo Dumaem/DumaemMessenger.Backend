@@ -16,10 +16,9 @@ public class MessageController : ControllerBase
     }
 
     [HttpGet]
-    [Route("/list")]
-    public IActionResult List([FromQuery] int count = 50, [FromQuery] int page = 0)
+    public async Task<IActionResult> List([FromQuery] string chatName, [FromQuery] int count = 50, [FromQuery] int page = 0)
     {
-        var res = _messageService.ListMessagesAsync("testChat1", 10, 0);
-        return Ok();
+        var res = await _messageService.ListMessagesAsync(chatName, count, page * count);
+        return Ok(res);
     }
 }

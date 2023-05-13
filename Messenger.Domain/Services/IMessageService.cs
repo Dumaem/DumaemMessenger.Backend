@@ -8,6 +8,7 @@ namespace Messenger.Domain.Services
     {
         Task<ListDataResult<Message>> ListMessagesAsync(string chatId, int count, int offset);
         Task<EntityResult<Message>> SaveMessageAsync(Message message, string chatId, SendMessageOptions[] options);
+        Task<EntityResult<Message>> EditMessageAsync(Message message);
         Task<string> GetShortMessagePreview(long messageId);
         // Task SendMessageAsync(int chatId, int userId, byte[] content, int messageTypeId);
         // Task DeleteMessageAsync(long messageId, int? userId = null);

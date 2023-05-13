@@ -41,6 +41,13 @@ namespace Messenger.Domain.Services.Impl
                 { Success = true, Entity = await _messageRepository.GetMessageByIdAsync(result) };
         }
 
+        public async Task<EntityResult<Message>> EditMessageAsync(Message message)
+        {
+            await _messageRepository.EditMessageByIdAsync(message.Id, message);
+            return new EntityResult<Message>
+                { Success = true, Entity = await _messageRepository.GetMessageByIdAsync(message.Id) };
+        }
+
         public async Task<string> GetShortMessagePreview(long messageId)
         {
             return await _messageRepository.GetShortMessagePreview(messageId);

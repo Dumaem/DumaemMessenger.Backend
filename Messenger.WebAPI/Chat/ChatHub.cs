@@ -57,6 +57,42 @@ public class ChatHub : Hub
         await base.OnDisconnectedAsync(exception);
     }
 
+    [HubMethodName(SignalRServerMethods.EditMessage)]
+    public async Task EditMessage(EditMessageContext message)
+    {
+        var user = await GetUserFromContextAsync();
+        if (!await _chatService.IsChatExistsAsync(message.ChatId))
+        {
+            var result = new BaseResult { Success = false, Message = "Passed chat does not exist" };
+            await Clients.Caller.SendAsync(SignalRClientMethods.MessageNotDelivered, result);
+            return;
+        }
+
+        var domainMessage = new Message
+        {
+            Content = new MessageContent { Content = message.Content, TypeId = message.ContentType },
+            SenderId = user.Id, Id = message.MessageId
+        };
+
+        var res = await _messageService.EditMessageAsync(domainMessage);
+        if (!res.Success)
+        {
+            var result = new BaseResult { Success = false, Message = "Error creating a message: " + res.Message };
+            await Clients.Caller.SendAsync(SignalRClientMethods.MessageNotDelivered, result);
+            return;
+        }
+
+        var entity = res.Entity;
+        message = new EditMessageContext
+        {
+            ContentType = entity.Content.TypeId,
+            Content = entity.Content.Content,
+            ChatId = message.ChatId,
+            MessageId = res.Entity.Id,
+        };
+        await Clients.Group(message.ChatId).SendAsync(SignalRClientMethods.MessageEdited, message);
+    }
+
     [HubMethodName(SignalRServerMethods.SendMessage)]
     public async Task SendMessageToChat(MessageContext message, SendMessageOptions[] options)
     {
@@ -91,7 +127,8 @@ public class ChatHub : Hub
             ForwardedMessageId = entity.ForwardedMessageId,
             RepliedMessageId = entity.RepliedMessageId,
             SendDate = entity.DateOfDispatch,
-            ChatId = message.ChatId
+            ChatId = message.ChatId,
+            User = user,
         };
         await Clients.Group(message.ChatId).SendAsync(SignalRClientMethods.ReceiveMessage, message);
     }

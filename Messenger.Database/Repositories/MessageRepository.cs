@@ -26,7 +26,7 @@ namespace Messenger.Database.Repositories
 
         public async Task<ListDataResult<Message>> ListMessagesAsync(string chatId, int count, int offset)
         {
-            var chat = await _context.Chats.FirstAsync(x => x.Name == chatId);
+            var chat = await _context.Chats.FirstOrDefaultAsync(x => x.Name == chatId) ?? throw new NotFoundException();
             var messages = _context.Messages
                 .Include(x => x.MessageContent)
                 .Where(x => x.ChatId == chat.Id)
