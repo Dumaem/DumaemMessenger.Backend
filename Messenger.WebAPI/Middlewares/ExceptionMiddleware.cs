@@ -24,6 +24,11 @@ public class ExceptionMiddleware
         {
             await Next(context);
         }
+        catch (NotFoundException)
+        {
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+            await context.Response.WriteAsJsonAsync(new {Message = "Not found"});
+        }
         catch (MigrationException)
         {
             _logger.LogCritical("Migrations are failed. Contact developer for help");
@@ -39,11 +44,11 @@ public class ExceptionMiddleware
         }
         catch (Exception e)
         {
-            # if DEBUG
+# if DEBUG
             var errorMessage = e;
-            # else
+# else
             var errorMessage = ServerErrorMessages.InternalServerError;
-            #endif
+#endif
 
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
             _logger.Log(LogLevel.Error, "{ErrorMessage}", e.ToString());

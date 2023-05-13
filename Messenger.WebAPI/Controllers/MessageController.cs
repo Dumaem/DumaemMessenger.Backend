@@ -1,12 +1,10 @@
 ﻿using Messenger.Domain.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Messenger.WebAPI.Controllers;
 
-[ApiController]
-// [Authorize]
-[Route("/api/[controller]")]
-public class MessageController : ControllerBase
+public class MessageController : AuthorizedControllerBase
 {
     private readonly IMessageService _messageService;
 
@@ -16,10 +14,10 @@ public class MessageController : ControllerBase
     }
 
     [HttpGet]
-    [Route("/list")]
+    [Route("list")]
     public IActionResult List([FromQuery] int count = 50, [FromQuery] int page = 0)
     {
-        var res = _messageService.ListMessagesAsync("testChat1", 10, 0);
+        var res = _messageService.ListMessagesAsync("testChat1", ParseHttpClaims().Id, 10, 0);
         return Ok();
     }
 }

@@ -16,9 +16,9 @@ namespace Messenger.Domain.Services.Impl
             _userRepository = userRepository;
         }
 
-        public async Task<ListDataResult<Message>> ListMessagesAsync(string chatId, int count, int offset)
+        public async Task<ListDataResult<Message>> ListMessagesAsync(string chatId, int userId, int count, int offset)
         {
-            var res = await _messageRepository.ListMessagesAsync(chatId, count, offset);
+            var res = await _messageRepository.ListMessagesAsync(chatId, userId, count, offset);
             return res;
         }
 
