@@ -77,7 +77,7 @@ public class ChatRepository : IChatRepository
             };
             var lastMessage = _context.Messages
                 .Include(x => x.MessageContent)
-                .Where(x => x.ChatId == c.Id)
+                .Where(x => x.ChatId == c.Id && !x.IsDeleted && x.DeletedMessages.All(z => z.UserId != id))
                 .OrderBy(x => x.DateOfDispatch)
                 .LastOrDefault();
             if (lastMessage is not null)
