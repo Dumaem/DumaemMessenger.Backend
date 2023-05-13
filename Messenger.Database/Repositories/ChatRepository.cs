@@ -15,11 +15,14 @@ public class ChatRepository : IChatRepository
 {
     private readonly MessengerContext _context;
     private readonly MessengerReadonlyContext _readonlyContext;
+    private readonly IUserRepository _userRepository;
 
-    public ChatRepository(MessengerContext context, MessengerReadonlyContext readonlyContext)
+    public ChatRepository(MessengerContext context, MessengerReadonlyContext readonlyContext,
+        IUserRepository userRepository)
     {
         _context = context;
         _readonlyContext = readonlyContext;
+        _userRepository = userRepository;
     }
 
     public async Task<DatabaseCreateResult> CreateChatAsync(IEnumerable<int> participants, bool isPersonal,
@@ -78,7 +81,8 @@ public class ChatRepository : IChatRepository
                     ChatId = c.Id,
                     ChatName = c.IsPersonal 
                         ? c.GroupName = chatName : c.GroupName!,
-                    LastMessage = null
+                    LastMessage = null,
+                    SenderName = null
                 });
             }
 
@@ -92,6 +96,7 @@ public class ChatRepository : IChatRepository
                     ChatId = c.Id,
                     ChatName = c.IsPersonal ? chatName : c.GroupName!,
                     LastMessage = convertedLastMessage,
+                    SenderName = (await _userRepository.GetUserByIdAsync(lastMessage.SenderId))?.Name
                 });
             }
         }
