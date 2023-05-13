@@ -24,12 +24,13 @@ namespace Messenger.Database.Repositories
             _readonlyContext = readonlyContext;
         }
 
-        public async Task<ListDataResult<Message>> ListMessagesAsync(string chatId, int count, int offset)
+        public async Task<ListDataResult<Message>> ListMessagesAsync(string chatId, int userId, int count, int offset)
         {
             var chat = await _context.Chats.FirstAsync(x => x.Name == chatId);
             var messages = _context.Messages
                 .Include(x => x.MessageContent)
-                .Where(x => x.ChatId == chat.Id)
+                .Where(x => x.ChatId == chat.Id && !x.IsDeleted)
+                .Include(x => x.DeletedMessages.Where(z => z.UserId == userId))
                 .OrderByDescending(x => x.DateOfDispatch)
                 .Skip(offset)
                 .Take(count);
@@ -39,7 +40,7 @@ namespace Messenger.Database.Repositories
                 TotalItemsCount = _context.Messages.Count()
             };
         }
-        
+
         public async Task<string> GetShortMessagePreview(long messageId)
         {
             return (await _context.Messages

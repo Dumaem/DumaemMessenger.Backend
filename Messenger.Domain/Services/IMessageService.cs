@@ -6,7 +6,7 @@ namespace Messenger.Domain.Services
 {
     public interface IMessageService
     {
-        Task<ListDataResult<Message>> ListMessagesAsync(string chatId, int count, int offset);
+        Task<ListDataResult<Message>> ListMessagesAsync(string chatId, int userId, int count, int offset);
         Task<EntityResult<Message>> SaveMessageAsync(Message message, string chatId, SendMessageOptions[] options);
         Task<string> GetShortMessagePreview(long messageId);
         // Task SendMessageAsync(int chatId, int userId, byte[] content, int messageTypeId);
