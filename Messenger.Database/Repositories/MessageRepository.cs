@@ -11,147 +11,146 @@ using Messenger.Domain.Repositories;
 using Messenger.Domain.Results;
 using Microsoft.EntityFrameworkCore;
 
-namespace Messenger.Database.Repositories
+namespace Messenger.Database.Repositories;
+
+public class MessageRepository : IMessageRepository
 {
-    public class MessageRepository : IMessageRepository
+    private readonly MessengerContext _context;
+    private readonly MessengerReadonlyContext _readonlyContext;
+
+    public MessageRepository(MessengerContext context, MessengerReadonlyContext readonlyContext)
     {
-        private readonly MessengerContext _context;
-        private readonly MessengerReadonlyContext _readonlyContext;
+        _context = context;
+        _readonlyContext = readonlyContext;
+    }
 
-        public MessageRepository(MessengerContext context, MessengerReadonlyContext readonlyContext)
+    public async Task<ListDataResult<Message>> ListMessagesAsync(string chatId, int count, int offset)
+    {
+        var chat = await _context.Chats.FirstOrDefaultAsync(x => x.Name == chatId) ?? throw new NotFoundException();
+        var messages = _context.Messages
+            .Include(x => x.MessageContent)
+            .Where(x => x.ChatId == chat.Id)
+            .OrderByDescending(x => x.DateOfDispatch)
+            .Skip(offset)
+            .Take(count);
+        return new ListDataResult<Message>
         {
-            _context = context;
-            _readonlyContext = readonlyContext;
-        }
-
-        public async Task<ListDataResult<Message>> ListMessagesAsync(string chatId, int count, int offset)
-        {
-            var chat = await _context.Chats.FirstOrDefaultAsync(x => x.Name == chatId) ?? throw new NotFoundException();
-            var messages = _context.Messages
-                .Include(x => x.MessageContent)
-                .Where(x => x.ChatId == chat.Id)
-                .OrderByDescending(x => x.DateOfDispatch)
-                .Skip(offset)
-                .Take(count);
-            return new ListDataResult<Message>
-            {
-                Success = true, Items = EntityConverter.ConvertMessages(messages),
-                TotalItemsCount = _context.Messages.Count()
-            };
-        }
+            Success = true, Items = EntityConverter.ConvertMessages(messages),
+            TotalItemsCount = _context.Messages.Count()
+        };
+    }
         
-        public async Task<string> GetShortMessagePreview(long messageId)
+    public async Task<string> GetShortMessagePreview(long messageId)
+    {
+        return (await _context.Messages
+            .Include(x => x.MessageContent)
+            .FirstAsync(x => x.Id == messageId)).MessageContent.Content[..20];
+    }
+
+    public async Task<long> CreateMessageAsync(Message message, string chatId)
+    {
+        var chat = await _context.Chats
+            .FirstOrDefaultAsync(x => x.Name == chatId) ?? throw new NotFoundException();
+        var dbMessage = new MessageDb
         {
-            return (await _context.Messages
-                .Include(x => x.MessageContent)
-                .FirstAsync(x => x.Id == messageId)).MessageContent.Content[..20];
-        }
+            Id = message.Id,
+            ChatId = chat.Id,
+            DateOfDispatch = message.DateOfDispatch,
+            SenderId = message.SenderId,
+            ForwardedMessageId = message.ForwardedMessageId,
+            RepliedMessageId = message.RepliedMessageId,
+        };
 
-        public async Task<long> CreateMessageAsync(Message message, string chatId)
+        var dbMessageContent = new MessageContentDb
         {
-            var chat = await _context.Chats
-                .FirstOrDefaultAsync(x => x.Name == chatId) ?? throw new NotFoundException();
-            var dbMessage = new MessageDb
-            {
-                Id = message.Id,
-                ChatId = chat.Id,
-                DateOfDispatch = message.DateOfDispatch,
-                SenderId = message.SenderId,
-                ForwardedMessageId = message.ForwardedMessageId,
-                RepliedMessageId = message.RepliedMessageId,
-            };
+            Message = dbMessage,
+            MessageId = dbMessage.Id,
+            Content = message.Content.Content,
+            TypeId = message.Content.TypeId
+        };
 
-            var dbMessageContent = new MessageContentDb
-            {
-                Message = dbMessage,
-                MessageId = dbMessage.Id,
-                Content = message.Content.Content,
-                TypeId = message.Content.TypeId
-            };
+        _context.Messages.Add(dbMessage);
+        _context.MessageContents.Add(dbMessageContent);
 
-            _context.Messages.Add(dbMessage);
-            _context.MessageContents.Add(dbMessageContent);
+        await _context.SaveChangesAsync();
+        return dbMessage.Id;
+    }
 
-            await _context.SaveChangesAsync();
-            return dbMessage.Id;
-        }
+    public async Task EditMessageByIdAsync(long id, Message editedMessage)
+    {
+        var message = _context.Messages.SingleOrDefault(m => m.Id == id) ??
+                      throw new ValidationException("No message found");
 
-        public async Task EditMessageByIdAsync(long id, Message editedMessage)
+        var messageContent = _context.MessageContents.SingleOrDefault(mc => mc.MessageId == message.Id) ??
+                             throw new DataException($"No message content for message {id}. Check database issues");
+
+        message.IsEdited = true;
+
+        messageContent.Content = editedMessage.Content.Content;
+        messageContent.TypeId = editedMessage.Content.TypeId;
+
+        _context.Messages.Update(message);
+        _context.MessageContents.Update(messageContent);
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<Message> GetMessageByIdAsync(long id)
+    {
+        var res = (await _readonlyContext.Connection.QueryAsync<MessageContentDb, MessageDb, MessageContentDb>(
+                      MessageRepositoryQueries.GetMessage,
+                      (messageContent, message) =>
+                      {
+                          messageContent.Message = message;
+                          return messageContent;
+                      },
+                      splitOn: "m_id", param: new { id })).SingleOrDefault() ??
+                  throw new ValidationException($"No message with id {id} found");
+
+        return new Message
         {
-            var message = _context.Messages.SingleOrDefault(m => m.Id == id) ??
-                          throw new ValidationException("No message found");
+            Id = res.MessageId,
+            ChatId = res.Message.ChatId,
+            DateOfDispatch = res.Message.DateOfDispatch,
+            IsDeleted = res.Message.IsDeleted,
+            IsEdited = res.Message.IsEdited,
+            SenderId = res.Message.SenderId,
+            ForwardedMessageId = res.Message.ForwardedMessageId,
+            RepliedMessageId = res.Message.RepliedMessageId,
+            Content = new MessageContent
+                { Content = res.Content, MessageId = res.MessageId, TypeId = res.TypeId }
+        };
+    }
 
-            var messageContent = _context.MessageContents.SingleOrDefault(mc => mc.MessageId == message.Id) ??
-                                 throw new DataException($"No message content for message {id}. Check database issues");
+    public async Task DeleteMessageForUserAsync(long deletedMessageId, int userId)
+    {
+        var deletedMessage = _context.Messages.SingleOrDefault(m => m.Id == deletedMessageId) ??
+                             throw new ValidationException("No message found");
 
-            message.IsEdited = true;
-
-            messageContent.Content = editedMessage.Content.Content;
-            messageContent.TypeId = editedMessage.Content.TypeId;
-
-            _context.Messages.Update(message);
-            _context.MessageContents.Update(messageContent);
-
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task<Message> GetMessageByIdAsync(long id)
+        DeletedMessageDb deletedMessageDb = new DeletedMessageDb()
         {
-            var res = (await _readonlyContext.Connection.QueryAsync<MessageContentDb, MessageDb, MessageContentDb>(
-                          MessageRepositoryQueries.GetMessage,
-                          (messageContent, message) =>
-                          {
-                              messageContent.Message = message;
-                              return messageContent;
-                          },
-                          splitOn: "m_id", param: new { id })).SingleOrDefault() ??
-                      throw new ValidationException($"No message with id {id} found");
+            MessageId = deletedMessageId,
+            UserId = userId
+        };
 
-            return new Message
-            {
-                Id = res.MessageId,
-                ChatId = res.Message.ChatId,
-                DateOfDispatch = res.Message.DateOfDispatch,
-                IsDeleted = res.Message.IsDeleted,
-                IsEdited = res.Message.IsEdited,
-                SenderId = res.Message.SenderId,
-                ForwardedMessageId = res.Message.ForwardedMessageId,
-                RepliedMessageId = res.Message.RepliedMessageId,
-                Content = new MessageContent
-                    { Content = res.Content, MessageId = res.MessageId, TypeId = res.TypeId }
-            };
-        }
+        _context.DeletedMessages.Add(deletedMessageDb);
+        await _context.SaveChangesAsync();
+    }
 
-        public async Task DeleteMessageForUserAsync(long deletedMessageId, int userId)
+    public async Task DeleteMessageForAllUsers(long deletedMessageId)
+    {
+        await _readonlyContext.Connection.QuerySingleOrDefaultAsync<MessageDb>(
+            MessageRepositoryQueries.DeleteMessageForAllUsers, new { id = deletedMessageId });
+    }
+
+    public async Task CreateReadMessage(long messageId, int userId)
+    {
+        ReadMessageDb readMessageDb = new ReadMessageDb()
         {
-            var deletedMessage = _context.Messages.SingleOrDefault(m => m.Id == deletedMessageId) ??
-                                 throw new ValidationException("No message found");
-
-            DeletedMessageDb deletedMessageDb = new DeletedMessageDb()
-            {
-                MessageId = deletedMessageId,
-                UserId = userId
-            };
-
-            _context.DeletedMessages.Add(deletedMessageDb);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task DeleteMessageForAllUsers(long deletedMessageId)
-        {
-            await _readonlyContext.Connection.QuerySingleOrDefaultAsync<MessageDb>(
-                MessageRepositoryQueries.DeleteMessageForAllUsers, new { id = deletedMessageId });
-        }
-
-        public async Task CreateReadMessage(long messageId, int userId)
-        {
-            ReadMessageDb readMessageDb = new ReadMessageDb()
-            {
-                MessageId = messageId,
-                UserId = userId
-            };
-            _context.ReadMessages.Add(readMessageDb);
-            await _context.SaveChangesAsync();
-        }
+            MessageId = messageId,
+            UserId = userId
+        };
+        _context.ReadMessages.Add(readMessageDb);
+        await _context.SaveChangesAsync();
     }
 }
