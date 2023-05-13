@@ -10,7 +10,7 @@ public interface IMessageService
     Task<EntityResult<Message>> SaveMessageAsync(Message message, string chatId, SendMessageOptions[] options);
     Task<EntityResult<Message>> EditMessageAsync(Message message);
     Task<BaseResult> ReadMessageAsync(long messageId, int userId);
+    Task DeleteMessageAsync(long messageId, int? userId = null);
     Task<string> GetChatNameFromMessage(long messageId);
     Task<string> GetShortMessagePreview(long messageId);
-    // Task DeleteMessageAsync(long messageId, int? userId = null);
 }

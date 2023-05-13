@@ -96,7 +96,7 @@ public class ChatHub : Hub
         };
         await Clients.Group(message.ChatId).SendAsync(SignalRClientMethods.ReceiveMessage, message);
     }
-    
+
     [HubMethodName(SignalRServerMethods.EditMessage)]
     public async Task EditMessage(EditMessageContext message)
     {
@@ -132,7 +132,7 @@ public class ChatHub : Hub
         };
         await Clients.Group(message.ChatId).SendAsync(SignalRClientMethods.MessageEdited, message);
     }
-    
+
     [HubMethodName(SignalRServerMethods.ReadMessage)]
     public async Task ReadMessage(long messageId)
     {
@@ -147,6 +147,14 @@ public class ChatHub : Hub
         var chatName = await _messageService.GetChatNameFromMessage(messageId);
         var context = new MessageReadContext { UserId = user.Id, MessageId = messageId, ChatName = chatName };
         await Clients.Group(chatName).SendAsync(SignalRClientMethods.MessageRead, context);
+    }
+
+    [HubMethodName(SignalRServerMethods.DeleteMessage)]
+    public async Task DeleteMessage(long messageId)
+    {
+        await _messageService.DeleteMessageAsync(messageId);
+        var chatName = await _messageService.GetChatNameFromMessage(messageId);
+        await Clients.Group(chatName).SendAsync(SignalRClientMethods.MessageDeleted, messageId);
     }
 
     private async Task<User> GetUserFromContextAsync()

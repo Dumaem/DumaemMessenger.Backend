@@ -132,10 +132,10 @@ public class MessageRepository : IMessageRepository
 
     public async Task DeleteMessageForUserAsync(long deletedMessageId, int userId)
     {
-        var deletedMessage = _context.Messages.SingleOrDefault(m => m.Id == deletedMessageId) ??
-                             throw new ValidationException("No message found");
+        if (_context.Messages.FirstOrDefault(x => x.Id == deletedMessageId) is null)
+            throw new NotFoundException();
 
-        DeletedMessageDb deletedMessageDb = new DeletedMessageDb()
+        var deletedMessageDb = new DeletedMessageDb
         {
             MessageId = deletedMessageId,
             UserId = userId
@@ -153,7 +153,7 @@ public class MessageRepository : IMessageRepository
 
     public async Task CreateReadMessage(long messageId, int userId)
     {
-        ReadMessageDb readMessageDb = new ReadMessageDb()
+        var readMessageDb = new ReadMessageDb
         {
             MessageId = messageId,
             UserId = userId

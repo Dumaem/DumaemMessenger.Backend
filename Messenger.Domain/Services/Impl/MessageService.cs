@@ -54,6 +54,17 @@ public class MessageService : IMessageService
         return new BaseResult { Success = true };
     }
 
+    public async Task DeleteMessageAsync(long messageId, int? userId = null)
+    {
+        if (userId is null)
+        {
+            await _messageRepository.DeleteMessageForAllUsers(messageId);
+            return;
+        }
+
+        await _messageRepository.DeleteMessageForUserAsync(messageId, userId.Value);
+    }
+
     public async Task<string> GetChatNameFromMessage(long messageId)
     {
         return await _messageRepository.GetChatNameFromMessage(messageId);
@@ -79,17 +90,6 @@ public class MessageService : IMessageService
     //     await _messageRepository.CreateMessageAsync(message);
     // }
     //
-    // public async Task DeleteMessageAsync(long messageId, int? userId = null)
-    // {
-    //     var message = await _messageRepository.GetMessageByIdAsync(messageId);
-    //
-    //     // Use the repository to delete message for all users
-    //     if (userId is null)
-    //     {
-    //         message.IsDeleted = true;
-    //         await _messageRepository.DeleteMessageForAllUsers(messageId);
-    //         return;
-    //     }
     //
     //     // Use the repository to delete the message for one user
     //     await _messageRepository.DeleteMessageForUserAsync(messageId, (int)userId);

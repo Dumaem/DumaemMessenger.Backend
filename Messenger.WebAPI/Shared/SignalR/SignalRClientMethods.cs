@@ -22,7 +22,12 @@ public static class SignalRClientMethods
     /// Уведомление о том, что пользователь прочитал сообщение
     /// </summary>
     /// <remarks>Работает с моделькой <see cref="MessageReadContext"/></remarks>
-    public const string MessageRead = "MessageRead";
+    public const string MessageRead = "MessageRead";   
+    
+    /// <summary>
+    /// Уведомление о том, что сообщение было удалено для всех
+    /// </summary>
+    public const string MessageDeleted = "MessageDeleted";
 
     /// <summary>
     /// Уведомление о том, что отправленное сообщение не будет доставлено
