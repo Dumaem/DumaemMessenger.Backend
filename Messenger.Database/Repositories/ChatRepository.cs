@@ -45,11 +45,11 @@ public class ChatRepository : IChatRepository
 
         _context.UserChats.Add(new UserChatDb
         {
-            Chat = chat, UserId = currentUserId 
+            Chat = chat, UserId = currentUserId
         });
 
         await _context.SaveChangesAsync();
-        return new DatabaseCreateResult {Success = true, ObjectId = chat.Id, Message = chat.Name};
+        return new DatabaseCreateResult { Success = true, ObjectId = chat.Id, Message = chat.Name };
     }
 
     public async Task<IEnumerable<ChatResult>> GetChatsForUserAsync(string email)
@@ -64,41 +64,29 @@ public class ChatRepository : IChatRepository
             .Select(x => x.ChatId);
         var userChats = _context.Chats
             .Include(x => x.Users)
-            .Include(x => x.Messages.Where(a => !a.IsDeleted
-            && a.DeletedMessages.All(y => y.UserId != id)))
-            .ThenInclude(x=>x.MessageContent)
             .Where(x => userChatIds.Contains(x.Id));
         var res = new List<ChatResult>();
         foreach (var c in userChats)
         {
-            var chatName = (await GetChatParticipantsAsync(c.Id)).First(x => x.Id != id).Name;
-            var lastMessage = c.Messages.LastOrDefault();
-            if (lastMessage is null)
+            var currentChat = new ChatResult
             {
-                res.Add(new ChatResult
-                {
-                    Success = true,
-                    ChatId = c.Id,
-                    ChatName = c.IsPersonal 
-                        ? c.GroupName = chatName : c.GroupName!,
-                    LastMessage = null,
-                    SenderName = null
-                });
+                Success = true, ChatId = c.Id,
+                ChatName = c.IsPersonal
+                    ? (await GetChatParticipantsAsync(c.Id)).First(x => x.Id != id).Name
+                    : c.GroupName!
+            };
+            var lastMessage = _context.Messages
+                .Include(x => x.MessageContent)
+                .Where(x => x.ChatId == c.Id && !x.IsDeleted && x.DeletedMessages.All(z => z.UserId != id))
+                .OrderBy(x => x.DateOfDispatch)
+                .LastOrDefault();
+            if (lastMessage is not null)
+            {
+                currentChat.LastMessage = EntityConverter.ConvertMessage(lastMessage);
+                currentChat.SenderName = (await _userRepository.GetUserByIdAsync(lastMessage.SenderId))?.Name;
             }
 
-            else
-            {
-                var convertedLastMessage = EntityConverter.ConvertMessage(lastMessage);
-                convertedLastMessage.Content = EntityConverter.ConvertMessageContent(lastMessage.MessageContent);
-                res.Add(new ChatResult
-                {
-                    Success = true,
-                    ChatId = c.Id,
-                    ChatName = c.IsPersonal ? chatName : c.GroupName!,
-                    LastMessage = convertedLastMessage,
-                    SenderName = (await _userRepository.GetUserByIdAsync(lastMessage.SenderId))?.Name
-                });
-            }
+            res.Add(currentChat);
         }
 
         return res;
@@ -107,7 +95,7 @@ public class ChatRepository : IChatRepository
     public async Task<IEnumerable<User>> GetChatParticipantsAsync(string name)
     {
         var users = await _readonlyContext.Connection
-            .QueryAsync<UserDb>(ChatRepositoryQueries.GetChatParticipantsByName, new {name});
+            .QueryAsync<UserDb>(ChatRepositoryQueries.GetChatParticipantsByName, new { name });
 
         return users.Select(x => new User
         {
@@ -118,7 +106,7 @@ public class ChatRepository : IChatRepository
     public async Task<IEnumerable<User>> GetChatParticipantsAsync(int chatId)
     {
         var users = await _readonlyContext.Connection
-            .QueryAsync<UserDb>(ChatRepositoryQueries.GetChatParticipantsById, new {chatId});
+            .QueryAsync<UserDb>(ChatRepositoryQueries.GetChatParticipantsById, new { chatId });
 
         return users.Select(x => new User
         {
@@ -129,13 +117,14 @@ public class ChatRepository : IChatRepository
     public async Task<Chat?> GetChatByName(string name, int currentUserId)
     {
         var res = await _readonlyContext.Connection.QuerySingleOrDefaultAsync<ChatDb>(
-            ChatRepositoryQueries.GetChatByName, new {name});
+            ChatRepositoryQueries.GetChatByName, new { name });
         return res is null
             ? null
             : new Chat
             {
-                Id = res.Id, Name = res.Name, IsPersonal = res.IsPersonal, GroupName = res.IsPersonal 
-                    ? (await GetChatParticipantsAsync(res.Id)).First( x=> x.Id != currentUserId).Name : res.GroupName
+                Id = res.Id, Name = res.Name, IsPersonal = res.IsPersonal, GroupName = res.IsPersonal
+                    ? (await GetChatParticipantsAsync(res.Id)).First(x => x.Id != currentUserId).Name
+                    : res.GroupName
             };
     }
 
@@ -143,20 +132,21 @@ public class ChatRepository : IChatRepository
     {
         var res = await _readonlyContext.Connection.QuerySingleOrDefaultAsync<ChatDb>(
             ChatRepositoryQueries.GetChatById,
-            new {id});
+            new { id });
         return res is null
             ? null
             : new Chat
             {
-                Id = res.Id, Name = res.Name, IsPersonal = res.IsPersonal, GroupName = res.IsPersonal 
-                    ? (await GetChatParticipantsAsync(res.Id)).First( x=> x.Id != currentUserId).Name : res.GroupName
+                Id = res.Id, Name = res.Name, IsPersonal = res.IsPersonal, GroupName = res.IsPersonal
+                    ? (await GetChatParticipantsAsync(res.Id)).First(x => x.Id != currentUserId).Name
+                    : res.GroupName
             };
     }
 
     public async Task<bool> IsChatExistsAsync(string chatId)
     {
         return await _readonlyContext.Connection.ExecuteScalarAsync<bool>(ChatRepositoryQueries.IsChatExists,
-            new {chatId});
+            new { chatId });
     }
 
     public async Task<BaseResult> AddMemberToChat(int chatId, int userId)
@@ -168,6 +158,6 @@ public class ChatRepository : IChatRepository
         });
         await _context.SaveChangesAsync();
 
-        return new BaseResult {Success = true};
+        return new BaseResult { Success = true };
     }
 }

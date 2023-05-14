@@ -1,8 +1,7 @@
-﻿namespace Messenger.Domain.Results
+﻿namespace Messenger.Domain.Results;
+
+public class BaseResult
 {
-    public class BaseResult
-    {
-        public bool Success { get; init; }
-        public string? Message { get; init; }
-    }
+    public bool Success { get; init; }
+    public string? Message { get; init; }
 }

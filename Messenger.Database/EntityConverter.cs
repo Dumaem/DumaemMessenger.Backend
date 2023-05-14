@@ -39,6 +39,7 @@ public static class EntityConverter
             ChatId = messageDb.ChatId,
             RepliedMessageId = messageDb.RepliedMessageId,
             ForwardedMessageId = messageDb.ForwardedMessageId,
+            Content = ConvertMessageContent(messageDb.MessageContent)
         };
     }
 

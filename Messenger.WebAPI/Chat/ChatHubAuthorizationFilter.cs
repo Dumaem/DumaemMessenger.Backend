@@ -21,8 +21,7 @@ public class ChatHubAuthorizationFilter : IHubFilter
         catch (ChatException ex)
         {
             if (ex.ExceptionType != ChatExceptionType.ExpiredToken) return ex;
-            await invocationContext.Hub.Clients.Caller.SendAsync(SignalRClientMethods.Unauthorized,
-                new UnauthorizedAccessContext { Message = ex.Message, StatusCode = HttpStatusCode.Unauthorized });
+            await invocationContext.Hub.Clients.Caller.SendAsync(SignalRClientMethods.Unauthorized, ex.Message);
             invocationContext.Context.Abort();
             return ex;
 

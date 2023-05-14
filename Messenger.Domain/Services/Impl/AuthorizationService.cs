@@ -234,6 +234,6 @@ public class AuthorizationService : IAuthorizationService
 
         await _userVerificationRepository.VerifyUser(user.Id);
 
-        return new BaseResult(){Success = true};
+        return new BaseResult {Success = true};
     }
 }

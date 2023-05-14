@@ -2,7 +2,8 @@
 
 public class EditMessageContext
 {
-    public long EditedMessageId { get; set; }
-    public required DateTime EditDate { get; set; }
+    public required int ContentType { get; set; }
+    public required string Content { get; set; }
+    public long MessageId { get; set; }
     public required string ChatId { get; set; }
 }
