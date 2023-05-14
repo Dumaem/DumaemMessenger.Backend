@@ -104,14 +104,13 @@ public class AuthorizationService : IAuthorizationService
 
     private ClaimsPrincipal? GetPrincipalFromToken(string token)
     {
+        var updatedTokenValidationParameters = _tokenValidationParameters.Clone();
+        updatedTokenValidationParameters.ValidateLifetime = false;
         var tokenHandler = new JwtSecurityTokenHandler();
         try
         {
-            var principal = tokenHandler.ValidateToken(token, _tokenValidationParameters, out var validatedToken);
-            if (!IsJwtHasValidSecurityAlgorithm(validatedToken))
-                return null;
-
-            return principal;
+            var principal = tokenHandler.ValidateToken(token, updatedTokenValidationParameters, out var validatedToken);
+            return !IsJwtHasValidSecurityAlgorithm(validatedToken) ? null : principal;
         }
         catch
         {
