@@ -21,14 +21,13 @@ public class ChatHubAuthorizationFilter : IHubFilter
         catch (ChatException ex)
         {
             if (ex.ExceptionType != ChatExceptionType.ExpiredToken) return ex;
-            await invocationContext.Hub.Clients.Caller.SendAsync(SignalRClientMethods.Unauthorized, ex.Message);
+            await invocationContext.Hub.Clients.Caller.SendAsync(SignalRClientMethods.Unauthorized, invocationContext.HubMethodName, invocationContext.HubMethodArguments);
             invocationContext.Context.Abort();
             return ex;
-
+        
         }
         catch (Exception ex)
         {
-            invocationContext.Context.Abort();
             return ex;
         }
     }
