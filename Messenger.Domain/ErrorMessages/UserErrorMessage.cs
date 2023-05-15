@@ -2,9 +2,9 @@
 
 public static class UserErrorMessage
 {
-    public const string NotExistUser = "User does not exists";
-    public const string UserAlreadyVerified = "User already verified";
-    public const string HasActualVerifyToken = "User already has actual verification token";
-    public const string DontHasActualVerifyToken = "User don't have a verification token";
-    public const string ExpiredVerifyToken = "Token is expired";
+    public const string NotExistUser = "Такого пользователя не существует";
+    public const string UserAlreadyVerified = "Пользователь уже верифицирован";
+    public const string HasActualVerifyToken = "У пользователя уже существует код для верификации";
+    public const string DontHasActualVerifyToken = "Для данного пользователя не существует кода верификации";
+    public const string ExpiredVerifyToken = "Код верификации истек";
 }

@@ -40,6 +40,8 @@ public class MessengerContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Name).HasColumnName("name");
+            entity.Property(e => e.IsPersonal).HasColumnName("isPersonal");
+            entity.Property(e => e.GroupName).HasColumnName("groupName");
         });
 
         modelBuilder.Entity<ContentTypeDb>(entity =>
@@ -116,8 +118,8 @@ public class MessengerContext : DbContext
             entity.Property(e => e.MessageId).HasColumnName("message_id");
             entity.Property(e => e.TypeId).HasColumnName("type_id");
 
-            entity.HasOne(d => d.Message).WithMany(p => p.MessageContents)
-                .HasForeignKey(d => d.MessageId)
+            entity.HasOne(d => d.Message)
+                .WithOne(p => p.MessageContent)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_message_content_message_id_message_id");
 

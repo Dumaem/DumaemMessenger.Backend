@@ -1,15 +1,16 @@
-﻿using Messenger.Domain.Models;
+﻿using Messenger.Domain.Enums;
+using Messenger.Domain.Models;
+using Messenger.Domain.Results;
 
-namespace Messenger.Domain.Services
+namespace Messenger.Domain.Services;
+
+public interface IMessageService
 {
-    public interface IMessageService
-    {
-        Task SendMessageAsync(int chatId, int userId, byte[] content, int messageTypeId);
-        Task DeleteMessageAsync(long messageId, int? userId = null);
-        Task ReadMessageAsync(long messageId, int userId);
-        Task ReplyMessageAsync(long repliedMessageId, int repliedMessageChatId,
-            int newMessageSenderId, byte[] content, int messageTypeId);
-        Task ForwardMessageAsync(long forwardedMessageId, byte[] content, int messageTypeId, int chatId, int userId);
-        Task EditMessageAsync(long messageId, byte[] content, int messageTypeId);
-    }
+    Task<ListDataResult<Message>> ListMessagesAsync(string chatId, int userId, int count, int offset);
+    Task<EntityResult<Message>> SaveMessageAsync(Message message, string chatId, SendMessageOptions[] options);
+    Task<EntityResult<Message>> EditMessageAsync(Message message);
+    Task<BaseResult> ReadMessageAsync(long messageId, int userId);
+    Task DeleteMessageAsync(long messageId, int? userId = null);
+    Task<string> GetChatNameFromMessage(long messageId);
+    Task<string> GetShortMessagePreview(long messageId);
 }
