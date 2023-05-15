@@ -35,7 +35,7 @@ public class AuthorizationService : IAuthorizationService
     public async Task<AuthenticationResult> RegisterAsync(string name, string email, string password, string? username,
         string userAgent)
     {
-        var existingUser = await _userService.GetUserByEmailAsync(email);
+        var existingUser = await _userService.GetUserAsync(email);
 
         if (existingUser is not null)
             return new AuthenticationResult {Success = false, Message = "User with this email already exists"};
@@ -53,7 +53,7 @@ public class AuthorizationService : IAuthorizationService
 
     public async Task<AuthenticationResult> AuthorizeAsync(string email, string password, string userAgent)
     {
-        var existingUser = await _userService.GetUserByEmailAsync(email);
+        var existingUser = await _userService.GetUserAsync(email);
 
         if (existingUser is null)
             return new AuthenticationResult {Success = false, Message = "User does not exist"};
@@ -88,7 +88,7 @@ public class AuthorizationService : IAuthorizationService
 
 
         int.TryParse(validatedToken.Claims.Single(x => x.Type == "id").Value, out var userId);
-        var user = await _userService.GetUserByIdAsync(userId);
+        var user = await _userService.GetUserAsync(userId);
 
         var deviceId = await GenerateDeviceId(userAgent);
         if (storedRefreshToken.IsRevoked || storedRefreshToken.IsUsed)
@@ -193,7 +193,7 @@ public class AuthorizationService : IAuthorizationService
     /// </summary>
     public async Task<VerificationResult> GenerateUserVerifyToken(string email)
     {
-        var user = await _userService.GetUserByEmailAsync(email);
+        var user = await _userService.GetUserAsync(email);
         if (user is null)
             return new VerificationResult {Message = UserErrorMessage.NotExistUser, Success = false};
 

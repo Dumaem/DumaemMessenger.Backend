@@ -5,6 +5,8 @@ using Messenger.Database.Read.Queries;
 using Messenger.Database.Write;
 using Messenger.Domain.Models;
 using Messenger.Domain.Repositories;
+using Messenger.Domain.Results;
+using Microsoft.EntityFrameworkCore;
 
 namespace Messenger.Database.Repositories;
 
@@ -62,5 +64,47 @@ public class UserRepository : IUserRepository
     {
         return await _readonlyContext.Connection.QuerySingleOrDefaultAsync<string>(
             UserRepositoryQueries.GetUserEncryptedPassword, new {id = userId});
+    }
+
+    public Task<IEnumerable<User>> GetUsers()
+    {
+        return Task.FromResult(_context.Users.Select(EntityConverter.ConvertUser));
+    }
+
+    public Task<IEnumerable<User>> GetUsers(int count, int offset)
+    {
+        return  Task.FromResult(_context.Users.Skip(offset).Take(count)
+            .AsEnumerable()
+            .Select(EntityConverter.ConvertUser));
+    }
+
+    public async Task<User?> ChangeName(int id, string name)
+    {
+        var dbUser = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
+        if (dbUser is null)
+            return null;
+        dbUser.Name = name;
+        await _context.SaveChangesAsync();
+        return EntityConverter.ConvertUser(dbUser);
+    }
+    
+    public async Task<User?> ChangeUsername(int id, string username)
+    {
+        var dbUser = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
+        if (dbUser is null)
+            return null;
+        dbUser.Username = username;
+        await _context.SaveChangesAsync();
+        return EntityConverter.ConvertUser(dbUser);
+    }
+
+    public async Task<User?> ChangeEmail(int id, string email)
+    {
+        var dbUser = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
+        if (dbUser is null)
+            return null;
+        dbUser.Email = email;
+        await _context.SaveChangesAsync();
+        return EntityConverter.ConvertUser(dbUser);
     }
 }

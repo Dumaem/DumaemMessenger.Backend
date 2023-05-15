@@ -165,7 +165,7 @@ public class ChatHub : Hub
         if (email is null)
             throw new ChatException(ChatExceptionType.WrongToken);
 
-        var user = await _userService.GetUserByEmailAsync(email);
+        var user = await _userService.GetUserAsync(email);
         if (user is null)
             throw new ChatException(ChatExceptionType.WrongToken);
 
