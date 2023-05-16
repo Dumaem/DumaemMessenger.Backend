@@ -4,7 +4,7 @@ public class ChatDb
 {
     public int Id { get; set; }
 
-    public string Name { get; set; } = null!;
+    public string Guid { get; set; } = null!;
 
     public bool IsPersonal { get; set; }
     public string? GroupName { get; set; }

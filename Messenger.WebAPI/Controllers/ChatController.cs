@@ -16,21 +16,15 @@ public class ChatController : AuthorizedControllerBase
         _logger = logger;
         _chatService = chatService;
     }
-    
+
     [HttpPost]
     [Route("create-chat")]
     public async Task<IActionResult> CreateChat([FromBody] ChatCreateCredentials credentials)
     {
         var userId = ParseHttpClaims().Id;
-        BaseResult result;
-        if (!credentials.IsPersonal)
-        {
-            result = await _chatService.CreateChatAsync(credentials.ParticipantsIds, credentials.GroupName!, userId);
-        }
-        else
-        {
-            result = await _chatService.CreatePersonalChatAsync(credentials.ParticipantsIds.Last(),userId);
-        }
+        if (!credentials.ParticipantsIds.Contains(userId))
+            return BadRequest("Cannot create a chat without self");
+        var result = await _chatService.CreateChatAsync(credentials.ParticipantsIds, credentials.GroupName);
         if (!result.Success)
             return BadRequest(result.Message);
         return Ok();
@@ -61,47 +55,49 @@ public class ChatController : AuthorizedControllerBase
     public async Task<IActionResult> GetChatMembers([FromQuery] string name)
     {
         var result = await _chatService.GetChatParticipantsAsync(name);
-        if(!result.Any())
+        if (!result.Any())
             return BadRequest();
         return Ok(result);
     }
-    
+
     [HttpGet]
     [Route("get-chat-members-by-id")]
     public async Task<IActionResult> GetChatMembers([FromQuery] int id)
     {
         var result = await _chatService.GetChatParticipantsAsync(id);
-        if(!result.Any())
+        if (!result.Any())
             return BadRequest();
         return Ok(result);
     }
-    
+
     [HttpGet]
     [Route("get-user-chats-by-email")]
     public async Task<IActionResult> GetUserChats([FromQuery] string email)
     {
         var result = await _chatService.GetChatsForUserAsync(email);
-        if(!result.Any())
+        if (!result.Any())
             return BadRequest();
         return Ok(result);
     }
-    
+
     [HttpGet]
     [Route("get-user-chats-by-id")]
     public async Task<IActionResult> GetUserChats([FromQuery] int id)
     {
         var result = await _chatService.GetChatsForUserAsync(id);
-        if(!result.Any())
+        if (!result.Any())
             return BadRequest();
         return Ok(result);
     }
-    
+
     [HttpPost]
     [Route("add-member-to-chat")]
-    public async Task<IActionResult> AddMemberToChat([FromQuery] int chatId, [FromQuery] int userId)
+    public async Task<IActionResult> AddMemberToChat([FromQuery] string chatId, [FromQuery] int userId)
     {
+        if (!await _chatService.IsMemberParted(chatId, ParseHttpClaims().Id))
+            return BadRequest("You are not parted in this chat to add members");
         var result = await _chatService.AddMemberToChatAsync(chatId, userId);
-        if(!result.Success)
+        if (!result.Success)
             return BadRequest(result.Message);
         return Ok(result);
     }

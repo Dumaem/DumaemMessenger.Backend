@@ -39,7 +39,7 @@ public class MessengerContext : DbContext
             entity.ToTable("chat");
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Name).HasColumnName("name");
+            entity.Property(e => e.Guid).HasColumnName("name");
             entity.Property(e => e.IsPersonal).HasColumnName("isPersonal");
             entity.Property(e => e.GroupName).HasColumnName("groupName");
         });
