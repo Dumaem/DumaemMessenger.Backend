@@ -5,9 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Messenger.WebAPI.Controllers;
 
-[ApiController]
-[Route("/api/[controller]")]
-public class UserController : ControllerBase
+public class UserController : AuthorizedControllerBase
 {
     private readonly IUserService _userService;
     private readonly ILogger<UserController> _logger;
@@ -79,7 +77,7 @@ public class UserController : ControllerBase
     }
     
     [HttpPut]
-    [Route("changeUsername")]
+    [Route("changeEmail")]
     public async Task<IActionResult> ChangeEmail([FromQuery] int id, [FromQuery] string email)
     {
         var result = await _userService.ChangeEmail(id, email);
