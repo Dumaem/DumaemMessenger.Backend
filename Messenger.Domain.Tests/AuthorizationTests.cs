@@ -51,7 +51,7 @@ public class AuthorizationTests
     [Fact]
     public async Task RegisterAsync_ExistingUser_ShouldReturnUnsuccessfulResult()
     {
-        _userServiceMock.Setup(x => x.GetUserByEmailAsync(It.IsAny<string>())).ReturnsAsync(new User());
+        _userServiceMock.Setup(x => x.GetUserAsync(It.IsAny<string>())).ReturnsAsync(new User());
 
         var res = await _authorizationService.RegisterAsync(It.IsAny<string>(),
             It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>());
@@ -66,7 +66,7 @@ public class AuthorizationTests
     {
         _encryptionService.Setup(x => x.EncryptStringAsync(It.IsAny<string>()))
             .ReturnsAsync(DefaultDeviceId);
-        _userServiceMock.Setup(x => x.GetUserByEmailAsync(It.IsAny<string>()))
+        _userServiceMock.Setup(x => x.GetUserAsync(It.IsAny<string>()))
             .ReturnsAsync((User?) null);
         _userServiceMock.Setup(x => x.CreateUserAsync(It.IsAny<User>(), It.IsAny<string>()))
             .ReturnsAsync(It.IsAny<int>());
@@ -89,7 +89,7 @@ public class AuthorizationTests
     [Fact]
     public async Task AuthorizeAsync_NotExistUser_ShouldReturnUnsuccessfulResult()
     {
-        _userServiceMock.Setup(x => x.GetUserByEmailAsync(It.IsAny<string>()))
+        _userServiceMock.Setup(x => x.GetUserAsync(It.IsAny<string>()))
             .ReturnsAsync((User?) null);
 
         var res = await _authorizationService.AuthorizeAsync(It.IsAny<string>(),
@@ -103,7 +103,7 @@ public class AuthorizationTests
     [Fact]
     public async Task AuthorizeAsync_WrongPassword_ShouldReturnUnsuccessfulResult()
     {
-        _userServiceMock.Setup(x => x.GetUserByEmailAsync(It.IsAny<string>())).ReturnsAsync(new User());
+        _userServiceMock.Setup(x => x.GetUserAsync(It.IsAny<string>())).ReturnsAsync(new User());
         _userServiceMock.Setup(x => x.CheckUserPasswordAsync(It.IsAny<int>(),
             It.IsAny<string>())).ReturnsAsync(false);
 
@@ -129,7 +129,7 @@ public class AuthorizationTests
                 Id = 1,
                 IsRevoked = false
             });
-        _userServiceMock.Setup(x => x.GetUserByEmailAsync(It.IsAny<string>())).ReturnsAsync(new User
+        _userServiceMock.Setup(x => x.GetUserAsync(It.IsAny<string>())).ReturnsAsync(new User
         {
             Name = It.IsAny<string>(),
             Username = It.IsAny<string>(),
@@ -333,7 +333,7 @@ public class AuthorizationTests
             Id = 1
         };
         _jwtSettingsMock.SetupJwtSettingsMock();
-        _userServiceMock.Setup(x => x.GetUserByIdAsync(It.IsAny<int>())).ReturnsAsync(testUser);
+        _userServiceMock.Setup(x => x.GetUserAsync(It.IsAny<int>())).ReturnsAsync(testUser);
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_jwtSettingsMock.Object.Key);
         var tokenDescriptor = new SecurityTokenDescriptor
@@ -384,7 +384,7 @@ public class AuthorizationTests
             Id = 1
         };
         _jwtSettingsMock.SetupJwtSettingsMock();
-        _userServiceMock.Setup(x => x.GetUserByIdAsync(It.IsAny<int>())).ReturnsAsync(testUser);
+        _userServiceMock.Setup(x => x.GetUserAsync(It.IsAny<int>())).ReturnsAsync(testUser);
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_jwtSettingsMock.Object.Key);
         var tokenDescriptor = new SecurityTokenDescriptor
@@ -435,7 +435,7 @@ public class AuthorizationTests
             Id = 1
         };
         _jwtSettingsMock.SetupJwtSettingsMock();
-        _userServiceMock.Setup(x => x.GetUserByIdAsync(It.IsAny<int>())).ReturnsAsync(testUser);
+        _userServiceMock.Setup(x => x.GetUserAsync(It.IsAny<int>())).ReturnsAsync(testUser);
 
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_jwtSettingsMock.Object.Key);

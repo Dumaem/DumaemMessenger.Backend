@@ -53,4 +53,16 @@ public static class EntityConverter
             MessageId = messageContentDb.MessageId
         };
     }
+
+    public static User ConvertUser(UserDb user)
+    {
+        return new User
+        {
+            Id = user.Id,
+            Username = user.Username,
+            Name = user.Name,
+            Email = user.Email,
+            IsVerified = user.IsVerified
+        };
+    }
 }

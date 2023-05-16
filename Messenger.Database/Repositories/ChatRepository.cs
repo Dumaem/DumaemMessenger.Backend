@@ -73,7 +73,8 @@ public class ChatRepository : IChatRepository
                 Success = true, ChatId = c.Id,
                 ChatName = c.IsPersonal
                     ? (await GetChatParticipantsAsync(c.Id)).First(x => x.Id != id).Name
-                    : c.GroupName!
+                    : c.GroupName!,
+                ChatGuid = c.Name,
             };
             var lastMessage = _context.Messages
                 .Include(x => x.MessageContent)

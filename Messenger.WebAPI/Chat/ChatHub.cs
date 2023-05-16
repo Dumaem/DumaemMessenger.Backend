@@ -61,6 +61,7 @@ public class ChatHub : Hub
     public async Task SendMessageToChat(MessageContext message, SendMessageOptions[] options)
     {
         var user = await GetUserFromContextAsync();
+        _logger.LogInformation("Message received from client {ClientName}", user.Name);
         if (!await _chatService.IsChatExistsAsync(message.ChatId))
         {
             var result = new BaseResult { Success = false, Message = "Passed chat does not exist" };
@@ -85,6 +86,7 @@ public class ChatHub : Hub
         var entity = res.Entity;
         message = new MessageContext
         {
+            Id = entity.Id,
             ContentType = entity.Content.TypeId,
             Content = entity.Content.Content,
             UserId = user.Id,
@@ -163,7 +165,7 @@ public class ChatHub : Hub
         if (email is null)
             throw new ChatException(ChatExceptionType.WrongToken);
 
-        var user = await _userService.GetUserByEmailAsync(email);
+        var user = await _userService.GetUserAsync(email);
         if (user is null)
             throw new ChatException(ChatExceptionType.WrongToken);
 

@@ -6,6 +6,7 @@ public class ChatResult : BaseResult
 {
     public int ChatId { get; set; }
     public string ChatName { get; set; } = null!;
+    public string ChatGuid { get; set; } = null!;
     public string? SenderName { get; set; }
     public Message? LastMessage { get; set; }
 }

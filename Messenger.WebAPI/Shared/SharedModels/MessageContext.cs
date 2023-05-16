@@ -4,6 +4,7 @@ namespace Messenger.WebAPI.Shared.SharedModels;
 
 public class MessageContext
 {
+    public long Id { get; set; }
     public required int ContentType { get; set; }
     public required string Content { get; set; }
     public required int UserId { get; set; }
