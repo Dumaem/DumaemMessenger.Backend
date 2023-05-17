@@ -1,7 +1,5 @@
-﻿using Messenger.Domain.Results;
-using Messenger.Domain.Services;
+﻿using Messenger.Domain.Services;
 using Messenger.WebAPI.Credentials;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Messenger.WebAPI.Controllers;
@@ -55,8 +53,6 @@ public class ChatController : AuthorizedControllerBase
     public async Task<IActionResult> GetChatMembers([FromQuery] string name)
     {
         var result = await _chatService.GetChatParticipantsAsync(name);
-        if (!result.Any())
-            return BadRequest();
         return Ok(result);
     }
 
@@ -65,8 +61,6 @@ public class ChatController : AuthorizedControllerBase
     public async Task<IActionResult> GetChatMembers([FromQuery] int id)
     {
         var result = await _chatService.GetChatParticipantsAsync(id);
-        if (!result.Any())
-            return BadRequest();
         return Ok(result);
     }
 
@@ -75,8 +69,6 @@ public class ChatController : AuthorizedControllerBase
     public async Task<IActionResult> GetUserChats([FromQuery] string email)
     {
         var result = await _chatService.GetChatsForUserAsync(email);
-        if (!result.Any())
-            return BadRequest();
         return Ok(result);
     }
 
@@ -85,8 +77,6 @@ public class ChatController : AuthorizedControllerBase
     public async Task<IActionResult> GetUserChats([FromQuery] int id)
     {
         var result = await _chatService.GetChatsForUserAsync(id);
-        if (!result.Any())
-            return BadRequest();
         return Ok(result);
     }
 

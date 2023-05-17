@@ -3,6 +3,7 @@ using Messenger.Database.Models;
 using Messenger.Database.Read;
 using Messenger.Database.Read.Queries;
 using Messenger.Database.Write;
+using Messenger.Domain.ErrorMessages;
 using Messenger.Domain.Models;
 using Messenger.Domain.Repositories;
 using Messenger.Domain.Results;
@@ -73,7 +74,7 @@ public class UserRepository : IUserRepository
 
     public Task<IEnumerable<User>> GetUsers(int count, int offset)
     {
-        return  Task.FromResult(_context.Users.Skip(offset).Take(count)
+        return Task.FromResult(_context.Users.Skip(offset).Take(count)
             .AsEnumerable()
             .Select(EntityConverter.ConvertUser));
     }
@@ -87,15 +88,18 @@ public class UserRepository : IUserRepository
         await _context.SaveChangesAsync();
         return EntityConverter.ConvertUser(dbUser);
     }
-    
-    public async Task<User?> ChangeUsername(int id, string username)
+
+    public async Task<EntityResult<User>> ChangeUsername(int id, string username)
     {
         var dbUser = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
         if (dbUser is null)
-            return null;
+            return new EntityResult<User> {Success = false, Message = UserErrorMessage.NotExistUser};
+        var existUser = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
+        if (existUser is null)
+            return new EntityResult<User> {Success = false, Message = UserErrorMessage.UsernameAlreadyExist};
         dbUser.Username = username;
         await _context.SaveChangesAsync();
-        return EntityConverter.ConvertUser(dbUser);
+        return new EntityResult<User> {Success = true, Entity = EntityConverter.ConvertUser(dbUser)};
     }
 
     public async Task<User?> ChangeEmail(int id, string email)

@@ -65,10 +65,7 @@ public class UserService : IUserService
     }
     public async Task<EntityResult<User>> ChangeUsername(int id, string username)
     {
-        var res = await _userRepository.ChangeUsername(id, username);
-        return res is not null
-            ? new EntityResult<User> {Success = true, Entity = res}
-            : new EntityResult<User> {Success = false, Message = UserErrorMessage.NotExistUser};
+        return await _userRepository.ChangeUsername(id, username);
     }
 
     public async Task<EntityResult<User>> ChangeEmail(int id, string email)
