@@ -151,18 +151,36 @@ public class ChatRepository : IChatRepository
             new { chatId });
     }
 
-    public async Task<BaseResult> AddMemberToChat(string chatGuid, int userId)
+    public async Task<ListDataResult<int>> AddMembersToChat(string chatGuid, IEnumerable<int> userIds)
     {
         var chatId = (await _context.Chats.FirstOrDefaultAsync(x => x.Guid == chatGuid))?.Id ??
                      throw new NotFoundException();
-        _context.UserChats.Add(new UserChatDb
+
+        var addedUsers = new List<int>();
+        var usersArray = userIds as int[] ?? userIds.ToArray();
+        foreach (var userId in usersArray)
         {
-            UserId = userId,
-            ChatId = chatId
-        });
+            var canAddUser = _context.Users.Any(x => x.Id == userId)
+                             && !_context.UserChats.Any(x => x.UserId == userId);
+            if (!canAddUser)
+                continue;
+
+            _context.UserChats.Add(new UserChatDb
+            {
+                UserId = userId,
+                ChatId = chatId
+            });
+            addedUsers.Add(userId);
+        }
+
         await _context.SaveChangesAsync();
 
-        return new BaseResult { Success = true };
+        var ignoredUsers = usersArray.Except(addedUsers);
+        return new ListDataResult<int>
+        {
+            Success = true, Items = addedUsers,
+            Message = $"Following users were failed to add: {string.Join(", ", ignoredUsers)}"
+        };
     }
 
     public async Task<bool> IsMemberParted(string chatGuid, int memberId)

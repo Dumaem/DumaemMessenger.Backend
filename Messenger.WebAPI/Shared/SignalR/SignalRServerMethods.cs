@@ -7,5 +7,5 @@ public static class SignalRServerMethods
     public const string ReadMessage = "ReadMessage";
     public const string DeleteMessage = "DeleteMessage";
     public const string CreateChat = "CreateChat";
-    public const string AddMemberToChat = "AddMemberToChat";
+    public const string AddMembersToChat = "AddMembersToChat";
 }

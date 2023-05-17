@@ -92,11 +92,11 @@ public class ChatController : AuthorizedControllerBase
 
     [HttpPost]
     [Route("add-member-to-chat")]
-    public async Task<IActionResult> AddMemberToChat([FromQuery] string chatId, [FromQuery] int userId)
+    public async Task<IActionResult> AddMemberToChat([FromQuery] string chatId, [FromQuery] IEnumerable<int> userIds)
     {
         if (!await _chatService.IsMemberParted(chatId, ParseHttpClaims().Id))
             return BadRequest("You are not parted in this chat to add members");
-        var result = await _chatService.AddMemberToChatAsync(chatId, userId);
+        var result = await _chatService.AddMembersToChatAsync(chatId, userIds);
         if (!result.Success)
             return BadRequest(result.Message);
         return Ok(result);

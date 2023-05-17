@@ -198,8 +198,8 @@ public class ChatHub : Hub
         }
     }
 
-    [HubMethodName(SignalRServerMethods.AddMemberToChat)]
-    public async Task AddMemberToChat(string chatGuid, int memberId)
+    [HubMethodName(SignalRServerMethods.AddMembersToChat)]
+    public async Task AddMembersToChat(string chatGuid, IEnumerable<int> memberIds)
     {
         var user = await GetUserFromContextAsync();
 
@@ -207,18 +207,19 @@ public class ChatHub : Hub
         {
             return;
         }
-        
-        var result = await _chatService.AddMemberToChatAsync(chatGuid, memberId);
+
+        var userId = memberIds as int[] ?? memberIds.ToArray();
+        var result = await _chatService.AddMembersToChatAsync(chatGuid, userId);
 
         if (!result.Success) return;
 
-        var newMemberConnections = _userConnections.TryGetValue(memberId, out var value) ? value : new List<string>();
-        foreach (var connection in newMemberConnections)
+        var newMembersConnections = userId.SelectMany(x => _userConnections.TryGetValue(x, out var value) ? value : new List<string>());
+        foreach (var connection in newMembersConnections)
         {
             await Groups.AddToGroupAsync(connection, chatGuid);
         }
 
-        await Clients.Group(chatGuid).SendAsync(SignalRClientMethods.MemberAdded, chatGuid, memberId);
+        await Clients.Group(chatGuid).SendAsync(SignalRClientMethods.MemberAdded, chatGuid, result.Items);
     }
 
     private async Task<User> GetUserFromContextAsync()

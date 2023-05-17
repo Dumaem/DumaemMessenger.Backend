@@ -69,8 +69,8 @@ public class ChatService : IChatService
         return await _repository.IsMemberParted(chatGuid, memberId);
     }
 
-    public async Task<BaseResult> AddMemberToChatAsync(string chatGuid, int userId)
+    public async Task<ListDataResult<int>> AddMembersToChatAsync(string chatGuid, IEnumerable<int> userIds)
     {
-        return await _repository.AddMemberToChat(chatGuid, userId);
+        return await _repository.AddMembersToChat(chatGuid, userIds);
     }
 }

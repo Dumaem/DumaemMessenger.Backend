@@ -14,6 +14,6 @@ public interface IChatRepository
     public Task<Chat?> GetChatByName(string name, int currentUserId);
     public Task<Chat?> GetChatById(int id, int currentUserId);
     public Task<bool> IsChatExistsAsync(string chatId);
-    public Task<BaseResult> AddMemberToChat(string chatGuid, int userId);
+    public Task<ListDataResult<int>> AddMembersToChat(string chatGuid, IEnumerable<int> userIds);
     public Task<bool> IsMemberParted(string chatGuid, int memberId);
 }

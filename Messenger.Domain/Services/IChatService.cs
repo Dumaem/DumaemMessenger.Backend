@@ -15,7 +15,7 @@ public interface IChatService
     public Task<EntityResult<Chat>> GetChatAsync(int id, int currentUserId);
     public Task<bool> IsChatExistsAsync(string chatId);
     public Task<bool> IsMemberParted(string chatGuid, int memberId);
-    public Task<BaseResult> AddMemberToChatAsync(string chatGuid, int userId);
+    public Task<ListDataResult<int>> AddMembersToChatAsync(string chatGuid, IEnumerable<int> userIds);
     
     
 }
