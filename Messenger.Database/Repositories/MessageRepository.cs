@@ -49,7 +49,7 @@ public class MessageRepository : IMessageRepository
     public async Task<ListDataResult<Message>> ListMessagesAsync(string chatId, int userId,
         int initialCount, int count, int offset)
     {
-        var chat = await _context.Chats.FirstOrDefaultAsync(x => x.Name == chatId) ?? throw new NotFoundException();
+        var chat = await _context.Chats.FirstOrDefaultAsync(x => x.Guid == chatId) ?? throw new NotFoundException();
         var messages = _context.Messages
             .Include(x => x.MessageContent)
             .Include(x => x.Sender)
