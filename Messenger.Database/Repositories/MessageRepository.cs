@@ -26,7 +26,7 @@ public class MessageRepository : IMessageRepository
 
     public async Task<ListDataResult<Message>> ListMessagesAsync(string chatId, int userId, int count, int offset)
     {
-        var chat = await _context.Chats.FirstOrDefaultAsync(x => x.Name == chatId) ?? throw new NotFoundException();
+        var chat = await _context.Chats.FirstOrDefaultAsync(x => x.Guid == chatId) ?? throw new NotFoundException();
         var messages = _context.Messages
             .Include(x => x.MessageContent)
             .Include(x => x.Sender)
@@ -82,13 +82,13 @@ public class MessageRepository : IMessageRepository
         return (await _context.Messages
                     .Include(x => x.Chat)
                     .FirstOrDefaultAsync(x => x.Id == messageId) ??
-                throw new NotFoundException()).Chat.Name;
+                throw new NotFoundException()).Chat.Guid;
     }
 
     public async Task<long> CreateMessageAsync(Message message, string chatId)
     {
         var chat = await _context.Chats
-            .FirstOrDefaultAsync(x => x.Name == chatId) ?? throw new NotFoundException();
+            .FirstOrDefaultAsync(x => x.Guid == chatId) ?? throw new NotFoundException();
         var dbMessage = new MessageDb
         {
             Id = message.Id,

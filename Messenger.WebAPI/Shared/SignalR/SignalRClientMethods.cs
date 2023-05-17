@@ -52,4 +52,14 @@ public static class SignalRClientMethods
     /// означает необходимость получить токе доступа заново
     /// </summary>
     public const string Unauthorized = "Unauthorized";
+
+    /// <summary>
+    /// Уведомление о создании нового чата
+    /// </summary>
+    public const string ChatCreated = "ChatCreated";
+    
+    /// <summary>
+    /// Уведомление о добавлении нового пользователя в чат
+    /// </summary>
+    public const string MemberAdded = "MemberAdded";
 }

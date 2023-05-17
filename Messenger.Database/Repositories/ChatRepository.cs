@@ -25,17 +25,17 @@ public class ChatRepository : IChatRepository
         _userRepository = userRepository;
     }
 
-    public async Task<DatabaseCreateResult> CreateChatAsync(IEnumerable<int> participants, bool isPersonal,
-        string? groupName, int currentUserId)
+    public async Task<EntityResult<Chat>> CreateChatAsync(IEnumerable<int> participants, string? groupName = null)
     {
+        var userIds = participants as int[] ?? participants.ToArray();
         var chat = new ChatDb
         {
-            Name = Guid.NewGuid().ToString(),
+            Guid = Guid.NewGuid().ToString(),
             GroupName = groupName,
-            IsPersonal = isPersonal,
+            IsPersonal = userIds.Length == 2,
         };
 
-        foreach (var userId in participants)
+        foreach (var userId in userIds)
         {
             _context.UserChats.Add(new UserChatDb
             {
@@ -43,13 +43,14 @@ public class ChatRepository : IChatRepository
             });
         }
 
-        _context.UserChats.Add(new UserChatDb
-        {
-            Chat = chat, UserId = currentUserId
-        });
-
         await _context.SaveChangesAsync();
-        return new DatabaseCreateResult { Success = true, ObjectId = chat.Id, Message = chat.Name };
+        return new EntityResult<Chat>()
+        {
+            Success = true,
+            Entity = new Chat
+                { GroupName = chat.GroupName, Name = chat.Guid, IsPersonal = chat.IsPersonal, Id = chat.Id },
+            Message = chat.Guid
+        };
     }
 
     public async Task<IEnumerable<ChatResult>> GetChatsForUserAsync(string email)
@@ -74,7 +75,7 @@ public class ChatRepository : IChatRepository
                 ChatName = c.IsPersonal
                     ? (await GetChatParticipantsAsync(c.Id)).First(x => x.Id != id).Name
                     : c.GroupName!,
-                ChatGuid = c.Name,
+                ChatGuid = c.Guid,
             };
             var lastMessage = _context.Messages
                 .Include(x => x.MessageContent)
@@ -123,7 +124,7 @@ public class ChatRepository : IChatRepository
             ? null
             : new Chat
             {
-                Id = res.Id, Name = res.Name, IsPersonal = res.IsPersonal, GroupName = res.IsPersonal
+                Id = res.Id, Name = res.Guid, IsPersonal = res.IsPersonal, GroupName = res.IsPersonal
                     ? (await GetChatParticipantsAsync(res.Id)).First(x => x.Id != currentUserId).Name
                     : res.GroupName
             };
@@ -138,7 +139,7 @@ public class ChatRepository : IChatRepository
             ? null
             : new Chat
             {
-                Id = res.Id, Name = res.Name, IsPersonal = res.IsPersonal, GroupName = res.IsPersonal
+                Id = res.Id, Name = res.Guid, IsPersonal = res.IsPersonal, GroupName = res.IsPersonal
                     ? (await GetChatParticipantsAsync(res.Id)).First(x => x.Id != currentUserId).Name
                     : res.GroupName
             };
@@ -150,15 +151,42 @@ public class ChatRepository : IChatRepository
             new { chatId });
     }
 
-    public async Task<BaseResult> AddMemberToChat(int chatId, int userId)
+    public async Task<ListDataResult<int>> AddMembersToChat(string chatGuid, IEnumerable<int> userIds)
     {
-        _context.UserChats.Add(new UserChatDb
+        var chatId = (await _context.Chats.FirstOrDefaultAsync(x => x.Guid == chatGuid))?.Id ??
+                     throw new NotFoundException();
+
+        var addedUsers = new List<int>();
+        var usersArray = userIds as int[] ?? userIds.ToArray();
+        foreach (var userId in usersArray)
         {
-            UserId = userId,
-            ChatId = chatId
-        });
+            var canAddUser = _context.Users.Any(x => x.Id == userId)
+                             && !_context.UserChats.Any(x => x.ChatId == chatId && x.UserId == userId);
+            if (!canAddUser)
+                continue;
+
+            _context.UserChats.Add(new UserChatDb
+            {
+                UserId = userId,
+                ChatId = chatId
+            });
+            addedUsers.Add(userId);
+        }
+
         await _context.SaveChangesAsync();
 
-        return new BaseResult { Success = true };
+        var ignoredUsers = usersArray.Except(addedUsers);
+        return new ListDataResult<int>
+        {
+            Success = true, Items = addedUsers,
+            Message = $"Following users were failed to add: {string.Join(", ", ignoredUsers)}"
+        };
+    }
+
+    public async Task<bool> IsMemberParted(string chatGuid, int memberId)
+    {
+        var chatId = (await _context.Chats.FirstOrDefaultAsync(x => x.Guid == chatGuid))?.Id ??
+                     throw new NotFoundException();
+        return await _context.UserChats.FirstOrDefaultAsync(x => x.ChatId == chatId && x.UserId == memberId) != null;
     }
 }

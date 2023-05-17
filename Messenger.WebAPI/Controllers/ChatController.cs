@@ -1,7 +1,5 @@
-﻿using Messenger.Domain.Results;
-using Messenger.Domain.Services;
+﻿using Messenger.Domain.Services;
 using Messenger.WebAPI.Credentials;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Messenger.WebAPI.Controllers;
@@ -16,21 +14,15 @@ public class ChatController : AuthorizedControllerBase
         _logger = logger;
         _chatService = chatService;
     }
-    
+
     [HttpPost]
     [Route("create-chat")]
     public async Task<IActionResult> CreateChat([FromBody] ChatCreateCredentials credentials)
     {
         var userId = ParseHttpClaims().Id;
-        BaseResult result;
-        if (!credentials.IsPersonal)
-        {
-            result = await _chatService.CreateChatAsync(credentials.ParticipantsIds, credentials.GroupName!, userId);
-        }
-        else
-        {
-            result = await _chatService.CreatePersonalChatAsync(credentials.ParticipantsIds.Last(),userId);
-        }
+        if (!credentials.ParticipantsIds.Contains(userId))
+            return BadRequest("Cannot create a chat without self");
+        var result = await _chatService.CreateChatAsync(credentials.ParticipantsIds, credentials.GroupName);
         if (!result.Success)
             return BadRequest(result.Message);
         return Ok();
@@ -63,7 +55,7 @@ public class ChatController : AuthorizedControllerBase
         var result = await _chatService.GetChatParticipantsAsync(name);
         return Ok(result);
     }
-    
+
     [HttpGet]
     [Route("get-chat-members-by-id")]
     public async Task<IActionResult> GetChatMembers([FromQuery] int id)
@@ -71,7 +63,7 @@ public class ChatController : AuthorizedControllerBase
         var result = await _chatService.GetChatParticipantsAsync(id);
         return Ok(result);
     }
-    
+
     [HttpGet]
     [Route("get-user-chats-by-email")]
     public async Task<IActionResult> GetUserChats([FromQuery] string email)
@@ -79,7 +71,7 @@ public class ChatController : AuthorizedControllerBase
         var result = await _chatService.GetChatsForUserAsync(email);
         return Ok(result);
     }
-    
+
     [HttpGet]
     [Route("get-user-chats-by-id")]
     public async Task<IActionResult> GetUserChats([FromQuery] int id)
@@ -87,13 +79,15 @@ public class ChatController : AuthorizedControllerBase
         var result = await _chatService.GetChatsForUserAsync(id);
         return Ok(result);
     }
-    
+
     [HttpPost]
     [Route("add-member-to-chat")]
-    public async Task<IActionResult> AddMemberToChat([FromQuery] int chatId, [FromQuery] int userId)
+    public async Task<IActionResult> AddMemberToChat([FromQuery] string chatId, [FromQuery] IEnumerable<int> userIds)
     {
-        var result = await _chatService.AddMemberToChatAsync(chatId, userId);
-        if(!result.Success)
+        if (!await _chatService.IsMemberParted(chatId, ParseHttpClaims().Id))
+            return BadRequest("You are not parted in this chat to add members");
+        var result = await _chatService.AddMembersToChatAsync(chatId, userIds);
+        if (!result.Success)
             return BadRequest(result.Message);
         return Ok(result);
     }
