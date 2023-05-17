@@ -16,11 +16,19 @@ public class MessageService : IMessageService
         _userRepository = userRepository;
     }
 
-        public async Task<ListDataResult<Message>> ListMessagesAsync(string chatId, int userId, int count, int offset)
-        {
-            var res = await _messageRepository.ListMessagesAsync(chatId, userId, count, offset);
-            return res;
-        }
+    public async Task<ListDataResult<Message>> ListMessagesAsync(string chatId, int userId, int count, int offset)
+    {
+        var res = await _messageRepository.ListMessagesAsync(chatId, userId, count, offset);
+        return res;
+    }
+
+    public async Task<ListDataResult<Message>> ListMessagesAsync(string chatId, int initialCount, int userId, int count,
+        int offset)
+    {
+        var res = await _messageRepository.ListMessagesAsync(chatId, userId, initialCount,
+            count, offset);
+        return res;
+    }
 
     public async Task<EntityResult<Message>> SaveMessageAsync(Message message, string chatId,
         SendMessageOptions[] options)
@@ -29,7 +37,7 @@ public class MessageService : IMessageService
             options.Contains(SendMessageOptions.ReplyToMessage))
         {
             return new EntityResult<Message>
-                { Success = false, Message = "Cannot both reply and forward a message" };
+                {Success = false, Message = "Cannot both reply and forward a message"};
         }
 
         if (options.Contains(SendMessageOptions.ForwardMessage))
@@ -38,20 +46,20 @@ public class MessageService : IMessageService
             message.ForwardedMessageId = null;
         var result = await _messageRepository.CreateMessageAsync(message, chatId);
         return new EntityResult<Message>
-            { Success = true, Entity = await _messageRepository.GetMessageByIdAsync(result) };
+            {Success = true, Entity = await _messageRepository.GetMessageByIdAsync(result)};
     }
 
     public async Task<EntityResult<Message>> EditMessageAsync(Message message)
     {
         await _messageRepository.EditMessageByIdAsync(message.Id, message);
         return new EntityResult<Message>
-            { Success = true, Entity = await _messageRepository.GetMessageByIdAsync(message.Id) };
+            {Success = true, Entity = await _messageRepository.GetMessageByIdAsync(message.Id)};
     }
 
     public async Task<BaseResult> ReadMessageAsync(long messageId, int userId)
     {
         await _messageRepository.CreateReadMessage(messageId, userId);
-        return new BaseResult { Success = true };
+        return new BaseResult {Success = true};
     }
 
     public async Task DeleteMessageAsync(long messageId, int? userId = null)

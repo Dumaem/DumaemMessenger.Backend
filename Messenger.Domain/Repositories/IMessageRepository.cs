@@ -6,6 +6,7 @@ namespace Messenger.Domain.Repositories;
 public interface IMessageRepository
 {
     Task<ListDataResult<Message>> ListMessagesAsync(string chatId, int userId, int count, int offset);
+    Task<ListDataResult<Message>> ListMessagesAsync(string chatId, int userId, int initialCount, int count, int offset);
     Task<long> CreateMessageAsync(Message message, string chatId);
     Task<Message> GetMessageByIdAsync(long id);
     Task EditMessageByIdAsync(long id, Message editedMessage);

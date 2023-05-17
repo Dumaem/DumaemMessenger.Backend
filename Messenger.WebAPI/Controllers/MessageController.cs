@@ -19,6 +19,15 @@ public class MessageController : AuthorizedControllerBase
         var res = await _messageService.ListMessagesAsync(chatName, ParseHttpClaims().Id, count, page * count);
         return Ok(res);
     }
+    
+    [HttpGet]
+    [Route("getFromCount")]
+    public async Task<IActionResult> ListFromInitCount([FromQuery] string chatName,[FromQuery] int initialCount, 
+        [FromQuery] int count = 50, [FromQuery] int page = 0)
+    {
+        var res = await _messageService.ListMessagesAsync(chatName, ParseHttpClaims().Id, count, page * count);
+        return Ok(res);
+    }
 
     [HttpDelete]
     public async Task<IActionResult> DeleteMessageForUser([FromQuery] long messageId)
