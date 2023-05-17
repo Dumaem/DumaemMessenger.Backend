@@ -12,6 +12,6 @@ public interface IUserRepository
     Task<IEnumerable<User>> GetUsers();
     Task<IEnumerable<User>> GetUsers(int count, int offset);
     Task<User?> ChangeName(int id, string name);
-    Task<User?> ChangeUsername(int id, string username);
+    Task<EntityResult<User>> ChangeUsername(int id, string username);
     Task<User?> ChangeEmail(int id, string email);
 }
