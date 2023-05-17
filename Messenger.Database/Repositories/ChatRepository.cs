@@ -161,7 +161,7 @@ public class ChatRepository : IChatRepository
         foreach (var userId in usersArray)
         {
             var canAddUser = _context.Users.Any(x => x.Id == userId)
-                             && !_context.UserChats.Any(x => x.UserId == userId);
+                             && !_context.UserChats.Any(x => x.ChatId == chatId && x.UserId == userId);
             if (!canAddUser)
                 continue;
 
