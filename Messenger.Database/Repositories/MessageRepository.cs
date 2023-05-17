@@ -29,6 +29,7 @@ public class MessageRepository : IMessageRepository
         var chat = await _context.Chats.FirstOrDefaultAsync(x => x.Name == chatId) ?? throw new NotFoundException();
         var messages = _context.Messages
             .Include(x => x.MessageContent)
+            .Include(x => x.Sender)
             .Where(x => x.ChatId == chat.Id
                         && !x.IsDeleted
                         && x.DeletedMessages

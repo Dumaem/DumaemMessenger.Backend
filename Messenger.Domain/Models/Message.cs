@@ -11,6 +11,7 @@ public class Message
     public bool IsDeleted { get; set; }
 
     public int SenderId { get; set; }
+    public string SenderName { get; set; }
 
     public int ChatId { get; set; }
 

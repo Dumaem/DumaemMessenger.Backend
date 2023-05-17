@@ -17,6 +17,7 @@ public static class EntityConverter
                 IsDeleted = res.IsDeleted,
                 IsEdited = res.IsEdited,
                 SenderId = res.SenderId,
+                SenderName = res.Sender.Name,
                 ForwardedMessageId = res.ForwardedMessageId,
                 RepliedMessageId = res.RepliedMessageId,
                 Content = new MessageContent
