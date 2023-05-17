@@ -19,7 +19,7 @@ public class ChatHub : Hub
     private readonly IMessageService _messageService;
     private readonly ILogger<ChatHub> _logger;
 
-    private readonly ConcurrentDictionary<int, List<string>> _userConnections = new();
+    private static readonly ConcurrentDictionary<int, List<string>> UserConnections = new();
 
     public ChatHub(IUserService userService,
         IChatService chatService,
@@ -35,7 +35,7 @@ public class ChatHub : Hub
     public override async Task OnConnectedAsync()
     {
         var user = await GetUserFromContextAsync();
-        _userConnections.GetOrAdd(user.Id, new List<string>()).Add(Context.ConnectionId);
+        UserConnections.GetOrAdd(user.Id, new List<string>()).Add(Context.ConnectionId);
 
         var userChats = await _chatService.GetChatsForUserAsync(user.Email);
         foreach (var chat in userChats)
@@ -43,7 +43,7 @@ public class ChatHub : Hub
             _logger.LogInformation("User {Username} connected to chat {ChatName}", user.Username, chat.ChatGuid);
             await Groups.AddToGroupAsync(Context.ConnectionId, chat.ChatGuid);
             await Clients.Group(chat.ChatGuid).SendAsync(SignalRClientMethods.StatusChanged,
-                new UserStatusContext { Status = UserOnlineStatus.Online, UserId = user.Id });
+                new UserStatusContext {Status = UserOnlineStatus.Online, UserId = user.Id});
         }
 
         await base.OnConnectedAsync();
@@ -52,7 +52,7 @@ public class ChatHub : Hub
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         var user = await GetUserFromContextAsync();
-        if (_userConnections.TryGetValue(user.Id, out var value))
+        if (UserConnections.TryGetValue(user.Id, out var value))
         {
             value.Remove(Context.ConnectionId);
         }
@@ -62,7 +62,7 @@ public class ChatHub : Hub
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, chat.ChatGuid);
             await Clients.Group(chat.ChatGuid).SendAsync(SignalRClientMethods.StatusChanged,
-                new UserStatusContext { Status = UserOnlineStatus.Offline, UserId = user.Id });
+                new UserStatusContext {Status = UserOnlineStatus.Offline, UserId = user.Id});
             _logger.LogInformation("User {Username} disconnected from chat {ChatName}", user.Username, chat.ChatGuid);
         }
 
@@ -76,7 +76,7 @@ public class ChatHub : Hub
         _logger.LogInformation("Message received from client {ClientName}", user.Name);
         if (!await _chatService.IsChatExistsAsync(message.ChatId))
         {
-            var result = new BaseResult { Success = false, Message = "Passed chat does not exist" };
+            var result = new BaseResult {Success = false, Message = "Passed chat does not exist"};
             await Clients.Caller.SendAsync(SignalRClientMethods.MessageNotDelivered, result);
             return;
         }
@@ -84,14 +84,14 @@ public class ChatHub : Hub
         var domainMessage = new Message
         {
             ForwardedMessageId = message.ForwardedMessageId, RepliedMessageId = message.RepliedMessageId,
-            Content = new MessageContent { Content = message.Content, TypeId = message.ContentType },
+            Content = new MessageContent {Content = message.Content, TypeId = message.ContentType},
             SenderId = user.Id, DateOfDispatch = DateTime.Now
         };
         var res = await _messageService.SaveMessageAsync(domainMessage, message.ChatId,
             Array.Empty<SendMessageOptions>());
         if (!res.Success)
         {
-            var result = new BaseResult { Success = false, Message = "Error creating a message: " + res.Message };
+            var result = new BaseResult {Success = false, Message = "Error creating a message: " + res.Message};
             await Clients.Caller.SendAsync(SignalRClientMethods.MessageNotDelivered, result);
             return;
         }
@@ -119,21 +119,21 @@ public class ChatHub : Hub
         var user = await GetUserFromContextAsync();
         if (!await _chatService.IsChatExistsAsync(message.ChatId))
         {
-            var result = new BaseResult { Success = false, Message = "Passed chat does not exist" };
+            var result = new BaseResult {Success = false, Message = "Passed chat does not exist"};
             await Clients.Caller.SendAsync(SignalRClientMethods.MessageNotDelivered, result);
             return;
         }
 
         var domainMessage = new Message
         {
-            Content = new MessageContent { Content = message.Content, TypeId = message.ContentType },
+            Content = new MessageContent {Content = message.Content, TypeId = message.ContentType},
             SenderId = user.Id, Id = message.MessageId
         };
 
         var res = await _messageService.EditMessageAsync(domainMessage);
         if (!res.Success)
         {
-            var result = new BaseResult { Success = false, Message = "Error creating a message: " + res.Message };
+            var result = new BaseResult {Success = false, Message = "Error creating a message: " + res.Message};
             await Clients.Caller.SendAsync(SignalRClientMethods.MessageNotDelivered, result);
             return;
         }
@@ -161,7 +161,7 @@ public class ChatHub : Hub
         }
 
         var chatName = await _messageService.GetChatNameFromMessage(messageId);
-        var context = new MessageReadContext { UserId = user.Id, MessageId = messageId, ChatName = chatName };
+        var context = new MessageReadContext {UserId = user.Id, MessageId = messageId, ChatName = chatName};
         await Clients.Group(chatName).SendAsync(SignalRClientMethods.MessageRead, context);
     }
 
@@ -187,7 +187,7 @@ public class ChatHub : Hub
         if (!result.Success) return;
 
         var connections = participantIds.SelectMany(x =>
-                _userConnections.TryGetValue(x, out var connections)
+                UserConnections.TryGetValue(x, out var connections)
                     ? connections
                     : new List<string>())
             .ToArray();
@@ -213,7 +213,8 @@ public class ChatHub : Hub
 
         if (!result.Success) return;
 
-        var newMembersConnections = userId.SelectMany(x => _userConnections.TryGetValue(x, out var value) ? value : new List<string>());
+        var newMembersConnections =
+            userId.SelectMany(x => UserConnections.TryGetValue(x, out var value) ? value : new List<string>());
         foreach (var connection in newMembersConnections)
         {
             await Groups.AddToGroupAsync(connection, chatGuid);
