@@ -46,6 +46,30 @@ public class MessageRepository : IMessageRepository
         };
     }
 
+    public async Task<ListDataResult<Message>> ListMessagesAsync(string chatId, int userId,
+        int initialCount, int count, int offset)
+    {
+        var chat = await _context.Chats.FirstOrDefaultAsync(x => x.Name == chatId) ?? throw new NotFoundException();
+        var messages = _context.Messages
+            .Include(x => x.MessageContent)
+            .Include(x => x.Sender)
+            .OrderByDescending(x => x.DateOfDispatch)
+            .Take(initialCount)
+            .Where(x => x.ChatId == chat.Id
+                        && !x.IsDeleted
+                        && x.DeletedMessages
+                            .All(y => y.UserId != userId)
+            );
+        var result = messages
+            .Skip(offset)
+            .Take(count);
+        return new ListDataResult<Message>
+        {
+            Success = true, Items = EntityConverter.ConvertMessages(result),
+            TotalItemsCount = messages.Count()
+        };
+    }
+
     public async Task<string> GetShortMessagePreview(long messageId)
     {
         return (await _context.Messages
@@ -118,7 +142,7 @@ public class MessageRepository : IMessageRepository
                           messageContent.Message = message;
                           return messageContent;
                       },
-                      splitOn: "m_id", param: new { id })).SingleOrDefault() ??
+                      splitOn: "m_id", param: new {id})).SingleOrDefault() ??
                   throw new ValidationException($"No message with id {id} found");
 
         return new Message
@@ -132,7 +156,7 @@ public class MessageRepository : IMessageRepository
             ForwardedMessageId = res.Message.ForwardedMessageId,
             RepliedMessageId = res.Message.RepliedMessageId,
             Content = new MessageContent
-                { Content = res.Content, MessageId = res.MessageId, TypeId = res.TypeId }
+                {Content = res.Content, MessageId = res.MessageId, TypeId = res.TypeId}
         };
     }
 
@@ -154,7 +178,7 @@ public class MessageRepository : IMessageRepository
     public async Task DeleteMessageForAllUsers(long deletedMessageId)
     {
         await _readonlyContext.Connection.QuerySingleOrDefaultAsync<MessageDb>(
-            MessageRepositoryQueries.DeleteMessageForAllUsers, new { id = deletedMessageId });
+            MessageRepositoryQueries.DeleteMessageForAllUsers, new {id = deletedMessageId});
     }
 
     public async Task CreateReadMessage(long messageId, int userId)
