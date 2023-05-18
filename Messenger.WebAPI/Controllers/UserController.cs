@@ -1,6 +1,5 @@
 ﻿using Messenger.Domain.ErrorMessages;
 using Messenger.Domain.Services;
-using Messenger.WebAPI.Credentials;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Messenger.WebAPI.Controllers;
