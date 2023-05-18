@@ -1,4 +1,4 @@
-﻿namespace Messenger.Migrator.Migrations;
+﻿namespace Messenger.Migrator.Migrations._2023._01;
 
 [Migration(2023230101)]
 public class Migration2023230101 : Migration
