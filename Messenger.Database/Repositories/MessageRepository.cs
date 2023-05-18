@@ -53,16 +53,19 @@ public class MessageRepository : IMessageRepository
         var messages = _context.Messages
             .Include(x => x.MessageContent)
             .Include(x => x.Sender)
-            .OrderByDescending(x => x.DateOfDispatch)
-            .Take(initialCount)
             .Where(x => x.ChatId == chat.Id
                         && !x.IsDeleted
                         && x.DeletedMessages
                             .All(y => y.UserId != userId)
             );
+
         var result = messages
+            .OrderBy(x => x.DateOfDispatch)
+            .Take(initialCount)
+            .OrderByDescending(x => x.DateOfDispatch)
             .Skip(offset)
             .Take(count);
+
         return new ListDataResult<Message>
         {
             Success = true, Items = EntityConverter.ConvertMessages(result),

@@ -1,5 +1,4 @@
-﻿using Messenger.Database.Write;
-using Messenger.Domain.Models;
+﻿using Messenger.Domain.Models;
 using Messenger.Domain.Results;
 
 namespace Messenger.Domain.Repositories;

@@ -1,6 +1,4 @@
-﻿using Messenger.Domain.Models;
-
-namespace Messenger.WebAPI.Credentials;
+﻿namespace Messenger.WebAPI.Credentials;
 
 public class ChatCreateCredentials
 {

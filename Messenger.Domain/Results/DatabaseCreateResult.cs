@@ -1,6 +1,4 @@
-﻿using Messenger.Domain.Results;
-
-namespace Messenger.Database.Write;
+﻿namespace Messenger.Domain.Results;
 
 public class DatabaseCreateResult : BaseResult
 {

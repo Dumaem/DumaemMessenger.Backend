@@ -25,7 +25,7 @@ public class MessageController : AuthorizedControllerBase
     public async Task<IActionResult> ListFromInitCount([FromQuery] string chatName,[FromQuery] int initialCount, 
         [FromQuery] int count = 50, [FromQuery] int page = 0)
     {
-        var res = await _messageService.ListMessagesAsync(chatName, ParseHttpClaims().Id, count, page * count);
+        var res = await _messageService.ListMessagesAsync(chatName, initialCount, ParseHttpClaims().Id, count, page * count);
         return Ok(res);
     }
 

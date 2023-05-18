@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using Messenger.Domain.Models;
+﻿using Messenger.Domain.Models;
 using Messenger.Domain.Results;
 
 namespace Messenger.Domain.Services;
