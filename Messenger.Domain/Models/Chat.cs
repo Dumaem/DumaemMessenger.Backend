@@ -7,4 +7,5 @@ public class Chat
     public string Name { get; set; } = null!;
     public string? GroupName { get; set; }
     public bool IsPersonal { get; set; }
+    public int? ParticipantCount { get; set; }
 }
