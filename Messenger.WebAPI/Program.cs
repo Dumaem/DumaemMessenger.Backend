@@ -6,11 +6,20 @@ using Messenger.WebAPI.Chat;
 using Messenger.WebAPI.Middlewares;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.OpenApi.Models;
+using Serilog;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Host.UseSerilog((hostingContext, loggerConfiguration) =>
+    loggerConfiguration
+        .ReadFrom
+        .Configuration(hostingContext.Configuration)
+        .WriteTo.Console()
+        .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Warning)
+);
 builder.Services.AddControllers();
 builder.Services.AddSignalR().AddHubOptions<ChatHub>(options =>
 {
@@ -29,7 +38,8 @@ builder.Services
     {
         c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
         {
-            Description = "Get token from [POST] /login endpoint and paste it here with this template: Bearer {Your token}",
+            Description =
+                "Get token from [POST] /login endpoint and paste it here with this template: Bearer {Your token}",
             Name = "Authorization",
             In = ParameterLocation.Header,
             Type = SecuritySchemeType.ApiKey,
@@ -56,6 +66,7 @@ builder.Services
     });
 
 var app = builder.Build();
+app.UseSerilogRequestLogging();
 app.UseMiddleware<ExceptionMiddleware>();
 
 // Configure the HTTP request pipeline.
