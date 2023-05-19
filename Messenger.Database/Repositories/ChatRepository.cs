@@ -126,7 +126,8 @@ public class ChatRepository : IChatRepository
             {
                 Id = res.Id, Name = res.Guid, IsPersonal = res.IsPersonal, GroupName = res.IsPersonal
                     ? (await GetChatParticipantsAsync(res.Id)).First(x => x.Id != currentUserId).Name
-                    : res.GroupName
+                    : res.GroupName,
+                ParticipantCount = _context.UserChats.Count(x => x.ChatId == res.Id)
             };
     }
 
@@ -141,7 +142,8 @@ public class ChatRepository : IChatRepository
             {
                 Id = res.Id, Name = res.Guid, IsPersonal = res.IsPersonal, GroupName = res.IsPersonal
                     ? (await GetChatParticipantsAsync(res.Id)).First(x => x.Id != currentUserId).Name
-                    : res.GroupName
+                    : res.GroupName,
+                ParticipantCount = _context.UserChats.Count(x => x.ChatId == id)
             };
     }
 
