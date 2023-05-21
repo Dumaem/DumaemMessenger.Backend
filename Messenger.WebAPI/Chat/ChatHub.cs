@@ -70,7 +70,7 @@ public class ChatHub : Hub
     }
 
     [HubMethodName(SignalRServerMethods.SendMessage)]
-    public async Task SendMessageToChat(MessageContext message)
+    public async Task SendMessage(MessageContext message)
     {
         var user = await GetUserFromContextAsync();
         _logger.LogInformation("Message received from client {ClientName}", user.Name);
