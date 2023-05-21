@@ -7,7 +7,7 @@ namespace Messenger.Domain.Validation.Validators;
 public class UserValidator : AbstractValidator<User>
 {
     private const string UsernameRegex = "^[a-zA-Z0-9_]+$";
-    private const string NameRegex = "^[a-zA-Z]+$";
+    private const string NameRegex = "^[a-zA-ZА-яа-яЁё ]+$";
     
     public const int MinimumPasswordLength = 6;
     public const int MaximumPasswordLength = 32;
